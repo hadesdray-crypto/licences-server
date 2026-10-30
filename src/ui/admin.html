@@ -198,9 +198,11 @@ function fromDays(days) { if (!days) return { n: 1, unit: 'vie' }; if (days % 36
 function plural(n, s, p) { return n + ' ' + (n > 1 ? (p || s + 's') : s); }
 function parsePrice(v) { return Math.round(parseFloat(String(v || '0').replace(',', '.').replace(/[^\d.]/g, '')) * 100) || 0; }
 var STATE_LABEL = { active: 'Active', pending: 'En attente', expired: 'Expirée', revoked: 'Désactivée', stock: 'Réserve' };
+var PAY_LABELS_EXTRA = { trial: 'Essai gratuit' };
 function badge(l) {
   var st = l.state, cls = 'b-' + st, txt = STATE_LABEL[st] || st;
   if (st === 'active' && l.days_left !== null && l.days_left <= 7) { cls = 'b-expiring'; txt = 'Expire dans ' + plural(l.days_left, 'jour'); }
+  if (l.trial) txt = 'Essai · ' + txt;
   return '<span class="badge ' + cls + '">' + esc(txt) + '</span>';
 }
 function expiryText(l) {
@@ -210,9 +212,9 @@ function expiryText(l) {
   if (l.state === 'expired') return 'Expirée le ' + fdate(l.expires_at);
   return 'Jusqu\'au ' + fdate(l.expires_at) + ' (' + plural(l.days_left, 'jour') + ')';
 }
-var EVENT_LABEL = { sale: 'Vente PayPal', order_created: 'Commande reçue', order_paid: 'Paiement validé', order_cancelled: 'Commande annulée', stripe_error: 'Erreur Stripe', sold: 'Vente rapide', license_created: 'Licence créée', stock_created: 'Clés en réserve', activate: 'Activation', device_added: 'Nouvel appareil', device_removed: 'Appareil retiré', devices_reset: 'Appareils réinitialisés', revoke: 'Désactivation', reactivate: 'Réactivation', refund: 'Remboursement', extend: 'Prolongation', set_expiry: 'Date modifiée', email_sent: 'Email envoyé', email_failed: 'Échec email', paypal_error: 'Erreur PayPal', webhook_error: 'Erreur webhook', webhook_rejected: 'Webhook refusé', webhook_ignored: 'Webhook ignoré', recover_sent: 'Clés renvoyées', recover_failed: 'Échec renvoi clés', settings: 'Réglages modifiés', product_created: 'Application créée', product_update: 'Nouvelle version publiée' };
+var EVENT_LABEL = { sale: 'Vente PayPal', trial_started: 'Essai gratuit démarré', order_created: 'Commande reçue', order_paid: 'Paiement validé', order_cancelled: 'Commande annulée', stripe_error: 'Erreur Stripe', sold: 'Vente rapide', license_created: 'Licence créée', stock_created: 'Clés en réserve', activate: 'Activation', device_added: 'Nouvel appareil', device_removed: 'Appareil retiré', devices_reset: 'Appareils réinitialisés', revoke: 'Désactivation', reactivate: 'Réactivation', refund: 'Remboursement', extend: 'Prolongation', set_expiry: 'Date modifiée', email_sent: 'Email envoyé', email_failed: 'Échec email', paypal_error: 'Erreur PayPal', webhook_error: 'Erreur webhook', webhook_rejected: 'Webhook refusé', webhook_ignored: 'Webhook ignoré', recover_sent: 'Clés renvoyées', recover_failed: 'Échec renvoi clés', settings: 'Réglages modifiés', product_created: 'Application créée', product_update: 'Nouvelle version publiée' };
 var ERROR_EVENTS = ['email_failed', 'paypal_error', 'stripe_error', 'webhook_error', 'webhook_rejected', 'webhook_ignored', 'recover_failed'];
-var PAY_LABELS = { cash: 'Espèces', virement: 'Virement', lydia: 'Lydia', wero: 'Wero', paypalme: 'PayPal', paypal: 'PayPal', stripe: 'Carte (Stripe)', revolut: 'Revolut', autre: 'Autre', '': 'Non précisé' };
+var PAY_LABELS = { trial: 'Essai gratuit', cash: 'Espèces', virement: 'Virement', lydia: 'Lydia', wero: 'Wero', paypalme: 'PayPal', paypal: 'PayPal', stripe: 'Carte (Stripe)', revolut: 'Revolut', autre: 'Autre', '': 'Non précisé' };
 function payLabel(m) { return PAY_LABELS[m] || m || 'Non précisé'; }
 var QUICK_METHODS = [['cash', 'Espèces'], ['virement', 'Virement'], ['lydia', 'Lydia'], ['wero', 'Wero'], ['paypalme', 'PayPal'], ['revolut', 'Revolut'], ['autre', 'Autre']];
 
@@ -364,7 +366,7 @@ async function viewHome() {
     var h = '<button class="btn primary big block" style="margin:0 0 12px" data-act="quick-sale">⚡ Vente rapide</button>';
     h += '<div class="grid2">' +
       '<div class="stat accent" data-act="go" data-to="/finances"><div class="l">Ce mois-ci</div><div class="v">' + eur(d.revenue_month) + '</div><div class="l">' + plural(d.sales_month, 'vente') + ' · total ' + eur(d.revenue_total) + '</div></div>' +
-      '<div class="stat" data-act="go" data-to="/licences?state=active"><div class="l">Licences actives</div><div class="v">' + d.active + '</div><div class="l">' + plural(d.customers, 'client') + '</div></div>' +
+      '<div class="stat" data-act="go" data-to="/licences?state=active"><div class="l">Licences actives</div><div class="v">' + d.active + '</div><div class="l">' + plural(d.customers, 'client') + (d.trials_active ? ' · ' + plural(d.trials_active, 'essai') + ' en cours' : '') + '</div></div>' +
       '<div class="stat" data-act="go" data-to="/licences?state=expiring"><div class="l">Expirent sous 7 j</div><div class="v" style="color:var(--amber)">' + d.expiring_7d + '</div><div class="l">' + plural(d.expired, 'expirée') + ' au total</div></div>' +
       '<div class="stat" data-act="go" data-to="/licences?state=pending"><div class="l">En attente d\'activation</div><div class="v" style="color:var(--blue)">' + d.pending + '</div><div class="l">' + plural(d.stock || 0, 'clé') + ' en réserve</div></div></div>';
     if (d.orders_pending) h += '<div class="card" style="border-color:var(--blue);cursor:pointer" data-act="go" data-to="/commandes"><div class="row"><div class="grow"><b>💶 ' + plural(d.orders_pending, 'paiement') + ' à valider</b><div class="muted small">Des clients ont commandé par virement, Lydia, Wero… Vérifiez l\'argent reçu puis appuyez sur « Payé » : la clé part toute seule.</div></div>' + I.chev + '</div></div>';
@@ -494,7 +496,7 @@ async function viewApps() {
       var link = srv().url + '/buy/' + p.slug;
       return '<div class="card"><div class="row"><div class="grow"><b>' + esc(p.name) + '</b> ' + (p.active ? '' : '<span class="badge b-off">désactivée</span>') + (p.version ? ' <span class="badge b-off">v' + esc(p.version) + '</span>' : '') +
         '<div class="muted small">' + (p.offers.filter(function (o) { return o.active; }).map(function (o) { return esc(o.label) + ' ' + eur(o.price_cents); }).join(' · ') || 'Aucune offre') + '</div>' +
-        '<div class="muted small">' + plural(p.licenses_count, 'licence') + ' · ' + eur(p.revenue) + ' · ' + plural(p.max_devices, 'appareil') + (p.stock_count ? ' · ' + plural(p.stock_count, 'clé') + ' en réserve' : '') + '</div></div></div>' +
+        '<div class="muted small">' + plural(p.licenses_count, 'licence') + ' · ' + eur(p.revenue) + ' · ' + plural(p.max_devices, 'appareil') + (p.trial_days ? ' · essai ' + plural(p.trial_days, 'jour') + (p.trials_count ? ' (' + p.trials_count + ')' : '') : '') + (p.stock_count ? ' · ' + plural(p.stock_count, 'clé') + ' en réserve' : '') + '</div></div></div>' +
         '<div class="actions"><button class="btn sm primary" data-act="quick-sale" data-id="' + p.id + '">⚡ Vente</button><button class="btn sm" data-act="go" data-to="/apps/' + p.id + '">Modifier</button>' +
         '<button class="btn sm blue" data-act="share-link" data-link="' + esc(link) + '" data-name="' + esc(p.name) + '">Partager la page de vente</button></div>' +
         '<div class="muted small mono" style="margin-top:8px;word-break:break-all">' + esc(link) + '</div></div>';
@@ -516,7 +518,7 @@ function offerRowHtml(o) {
 async function viewAppForm(id) {
   var opts = { title: id ? 'Modifier l\'application' : 'Nouvelle application', back: true, nav: '/apps' };
   loading(opts);
-  var p = { name: '', slug: '', description: '', download_url: '', version: '', changelog: '', max_devices: 2, active: 1, offers: [] };
+  var p = { name: '', slug: '', description: '', download_url: '', version: '', changelog: '', max_devices: 2, trial_days: 0, active: 1, offers: [] };
   try {
     if (id) p = (await api('/products/' + id)).product;
   } catch (e) { return render(page(opts, errorBox(e))); }
@@ -527,6 +529,8 @@ async function viewAppForm(id) {
     '<div class="muted small" style="margin-top:4px">Lien : <span class="mono" id="slug-preview">' + esc(srv().url + '/buy/' + (p.slug || '…')) + '</span></div>' +
     '<label class="f">Description (affichée sur la page de vente)</label><textarea name="description" placeholder="Regardez vos vidéos sans distraction…">' + esc(p.description) + '</textarea>' +
     '<label class="f">Appareils autorisés par licence</label><input type="number" name="max_devices" min="1" max="100" value="' + p.max_devices + '">' +
+    '<label class="f">Essai gratuit (jours, 0 = pas d\'essai)</label><input type="number" name="trial_days" min="0" max="365" value="' + (p.trial_days || 0) + '">' +
+    '<div class="muted small" style="margin-top:4px">Avec un essai, le client télécharge l\'application et choisit « Essayer » au premier lancement : elle fonctionne le nombre de jours indiqué, puis se bloque jusqu\'à l\'achat d\'un code. Un seul essai par appareil. Le lien de téléchargement devient visible sur la page de vente.</div>' +
     '<label class="check"><input type="checkbox" name="active"' + (p.active ? ' checked' : '') + '> Application en vente (page de vente active)</label>' +
     '</div><div class="card"><h3>Téléchargement et mises à jour</h3><p class="muted small">Le lien est envoyé au client après paiement. Quand vous publiez une nouvelle version, changez le numéro : les clients voient « Nouvelle version disponible » dans l\'application.</p>' +
     '<label class="f">Lien de téléchargement</label><input type="url" name="download_url" value="' + esc(p.download_url) + '" placeholder="https://…">' +
@@ -551,7 +555,7 @@ async function viewAppForm(id) {
     var offersOut = Array.from(document.querySelectorAll('.offer-row')).map(function (r) {
       return { id: r.dataset.id ? Number(r.dataset.id) : undefined, label: r.querySelector('.o-label').value.trim(), days: toDays(r.querySelector('.o-n').value, r.querySelector('.o-unit').value), price_cents: parsePrice(r.querySelector('.o-price').value) };
     }).filter(function (o) { return o.label; });
-    var body = { name: f.get('name'), slug: f.get('slug'), description: f.get('description'), download_url: f.get('download_url'), version: f.get('version'), changelog: f.get('changelog'), max_devices: Number(f.get('max_devices')), active: !!f.get('active'), offers: offersOut };
+    var body = { name: f.get('name'), slug: f.get('slug'), description: f.get('description'), download_url: f.get('download_url'), version: f.get('version'), changelog: f.get('changelog'), max_devices: Number(f.get('max_devices')), trial_days: Number(f.get('trial_days')) || 0, active: !!f.get('active'), offers: offersOut };
     var btn = form.querySelector('[type=submit]'); btn.disabled = true;
     try {
       var r = await api(id ? '/products/' + id : '/products', { method: id ? 'PUT' : 'POST', body: body });
@@ -571,7 +575,7 @@ async function viewLicences() {
   if (qs.state !== undefined || qs.product !== undefined) { S.licFilter.state = qs.state || ''; S.licFilter.product = qs.product || ''; S.licPage = 1; }
   var opts = { title: 'Licences', nav: '/licences', action: { label: '⚡ Vente', act: 'quick-sale' } };
   var f = S.licFilter;
-  var chips = [['', 'Toutes'], ['active', 'Actives'], ['expiring', 'Expirent bientôt'], ['pending', 'En attente'], ['expired', 'Expirées'], ['revoked', 'Désactivées'], ['stock', 'Réserve']];
+  var chips = [['', 'Toutes'], ['active', 'Actives'], ['expiring', 'Expirent bientôt'], ['pending', 'En attente'], ['trial', 'Essais'], ['expired', 'Expirées'], ['revoked', 'Désactivées'], ['stock', 'Réserve']];
   var h = '<input type="text" id="lic-q" placeholder="Rechercher une clé, un email, un nom…" value="' + esc(f.q) + '" style="margin-bottom:8px">' +
     '<div class="chips">' + chips.map(function (c) { return '<span class="chip ' + (f.state === c[0] ? 'on' : '') + '" data-act="lic-state" data-v="' + c[0] + '">' + c[1] + '</span>'; }).join('') + '</div>' +
     '<div class="row" style="margin-bottom:10px"><select id="lic-product" class="grow"><option value="">Toutes les applications</option></select><button class="btn sm" data-act="go" data-to="/licences/new">+ Détaillée</button></div>' +
@@ -956,6 +960,7 @@ function viewGuide() {
   var h = '<div class="card"><h3>1. Vendre quand vous êtes avec la personne</h3><p class="small muted">Accueil → <b>⚡ Vente rapide</b> → l\'application, la durée (vos formules servent de raccourcis, ou « Autre… » pour un prix/durée libre), le prix encaissé → <b>Générer la clé</b>. Appuyez sur <b>Envoyer au client</b> : le message (lien de téléchargement + code + mode d\'emploi) part par SMS, WhatsApp ou email. La personne télécharge, colle le code, c\'est réglé.</p></div>' +
     '<div class="card"><h3>2. Vendre en ligne, automatiquement</h3><ol class="steps small"><li>Onglet <b>Apps</b> → <b>+ Ajouter</b> : nom, lien de téléchargement, formules (durée + prix).</li><li><b>Partager la page de vente</b> : envoyez le lien, mettez-le sur un site, une plateforme, les réseaux.</li><li>Le client paie avec PayPal ou sa carte, voit sa clé immédiatement et la reçoit par email. Vous n\'avez rien à faire.</li></ol></div>' +
     '<div class="card"><h3>Les moyens de paiement</h3><ul class="steps small muted"><li><b>En personne</b> : Vente rapide, vous notez « payé par » (espèces, Lydia…).</li><li><b>Automatique en ligne</b> : PayPal et/ou carte bancaire (Stripe) → clé immédiate, rien à faire.</li><li><b>Virement, Lydia, Wero, PayPal entre proches, Revolut…</b> : activez-les dans Réglages avec vos coordonnées. Le client commande, vous recevez un email, vous vérifiez l\'argent, vous appuyez sur « Payé » → clé envoyée. Remboursement PayPal/Stripe → licence coupée automatiquement.</li></ul></div>' +
+    '<div class="card"><h3>Essai gratuit</h3><p class="small muted">Apps → Modifier → « Essai gratuit : 3 jours ». Vos clients téléchargent l\'application (le lien devient visible sur la page de vente), choisissent « Essayer » au premier lancement et ont 3 jours ; ensuite l\'application se bloque et propose d\'acheter un code. Un seul essai par appareil. Les essais apparaissent dans Licences (filtre « Essais ») et ne comptent pas dans vos ventes.</p></div>' +
     '<div class="card"><h3>3. Sans réseau</h3><p class="small muted">L\'application s\'ouvre et affiche les dernières données connues. Pour vendre sans connexion, préparez des clés à l\'avance : <b>Plus → Réserve de clés</b>. « Vente rapide » les utilise automatiquement et synchronise la vente au retour du réseau.</p></div>' +
     '<div class="card"><h3>4. Comment la protection fonctionne</h3><p class="small muted">Chaque clé est liée à un nombre d\'appareils (2 par défaut). Si un client donne sa clé à 10 personnes, seules les 2 premières fonctionneront. L\'application vérifie la clé auprès de ce serveur ; une licence désactivée ou expirée bloque l\'application sous 7 jours maximum, même hors ligne.</p></div>' +
     '<div class="card"><h3>5. Cas courants</h3><ul class="steps small muted"><li><b>Le client change d\'ordinateur</b> : sa licence → <b>Retirer</b> l\'ancien appareil (ou « Tout réinitialiser »).</li><li><b>Prolonger / faire un geste</b> : licence → <b>+30 jours</b>, <b>+1 an</b> ou date libre.</li><li><b>Remboursement PayPal</b> : la licence est désactivée automatiquement (webhook). Sinon : <b>Désactiver la licence</b>.</li><li><b>Clé perdue</b> : le client va sur la page « J\'ai un code » / « Déjà acheté ? », ou vous appuyez sur <b>Envoyer la clé par email</b>.</li><li><b>Nouvelle version de votre application</b> : Apps → Modifier → changez le lien et le numéro de version. Les clients voient « Nouvelle version disponible ».</li><li><b>Reçu / facture</b> : licence → <b>🧾 Reçu</b> (coordonnées dans Réglages → Vendeur).</li></ul></div>' +

@@ -136,6 +136,15 @@ Ce que fait le module dans Youpub :
 - Licence expirée ou désactivée par vous → Youpub se rebloque et redemande un code.
 - Nouvelle version publiée dans l'app → le client voit « Nouvelle version disponible » avec le lien.
 
+### B8. Essai gratuit (« testez 3 jours, puis payez »)
+Dans la fiche de l'application (Apps → Modifier), réglez **« Essai gratuit (jours) »** sur 3 (ou le nombre que vous voulez ; 0 = pas d'essai). À partir de là :
+- La page de vente affiche une carte « 🎁 Essai gratuit : 3 jours » avec le bouton **Télécharger l'application** (le lien de téléchargement devient public, c'est voulu : c'est l'essai qui attire les clients).
+- Au premier lancement, l'application propose **« Essayer gratuitement 3 jours »** à côté de la saisie du code. Un clic suffit, aucun code à taper.
+- Pendant l'essai, l'application fonctionne normalement et rappelle les jours restants.
+- Au bout des 3 jours, elle se bloque avec le message « Votre période d'essai gratuit est terminée. Achetez une licence pour continuer. » et le lien vers votre page de vente. Le client achète, colle son code, c'est reparti — sans rien réinstaller.
+- **Un seul essai par appareil** : impossible d'enchaîner les essais sur le même téléphone/ordinateur. (Une personne qui efface complètement les données de l'application ou change d'appareil peut en relancer un ; pour 3 jours, ce n'est pas un enjeu — le serveur limite en plus les demandes d'essai par adresse IP.)
+- Dans l'app d'administration : les essais apparaissent dans **Licences → Essais** (badge « Essai »), l'accueil affiche « X essais en cours », et ils ne comptent jamais dans vos ventes, vos finances ni l'export comptable.
+
 ---
 
 ## Au quotidien (depuis le téléphone)

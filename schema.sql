@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS products (
   max_devices   INTEGER NOT NULL DEFAULT 2,        -- appareils autorisés par défaut
   version       TEXT NOT NULL DEFAULT '',          -- dernière version disponible (ex : 1.2.0), annoncée aux clients
   changelog     TEXT NOT NULL DEFAULT '',          -- nouveautés de cette version
+  trial_days    INTEGER NOT NULL DEFAULT 0,        -- essai gratuit en jours (0 = pas d'essai)
   active        INTEGER NOT NULL DEFAULT 1,
   created_at    TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
 );
@@ -41,7 +42,7 @@ CREATE TABLE IF NOT EXISTS licenses (
   duration_days   INTEGER NOT NULL,                -- 0 = à vie
   max_devices     INTEGER NOT NULL DEFAULT 2,
   price_cents     INTEGER NOT NULL DEFAULT 0,
-  source          TEXT NOT NULL DEFAULT 'manual',  -- manual | paypal | stripe | stock (clé en réserve, pas encore vendue)
+  source          TEXT NOT NULL DEFAULT 'manual',  -- manual | paypal | stripe | trial (essai gratuit) | stock (clé en réserve, pas encore vendue)
   payment_method  TEXT NOT NULL DEFAULT '',        -- paypal | stripe | virement | lydia | wero | paypalme | revolut | cash | autre
   paypal_order_id TEXT UNIQUE,
   stripe_session_id TEXT,                          -- identifiant Stripe Checkout (index unique ci-dessous)

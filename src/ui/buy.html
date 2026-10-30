@@ -49,6 +49,12 @@
   <h1>__NAME__</h1>
   <p class="desc" id="desc"></p>
 
+  <div class="card hidden" id="trial">
+    <h2>🎁 Essai gratuit <span id="trial-days"></span></h2>
+    <p class="hint" style="margin:0 0 8px">Téléchargez l'application et choisissez <b>« Essayer gratuitement »</b> au premier lancement. Aucun code n'est nécessaire pendant la période d'essai ; ensuite, il suffit d'acheter un code ci-dessous.</p>
+    <a class="btn primary" id="trial-dl" href="#" target="_blank" rel="noopener">Télécharger l'application</a>
+  </div>
+
   <div class="card" id="buy">
     <h2>1. Choisissez votre formule</h2>
     <div id="offers"><p class="hint">Chargement…</p></div>
@@ -265,6 +271,11 @@
       product = p;
       $('desc').textContent = p.description || '';
       renderOffers();
+      if (p.trial_days > 0) {
+        $('trial-days').textContent = ': ' + p.trial_days + ' jour' + (p.trial_days > 1 ? 's' : '');
+        if (p.download_url) { $('trial-dl').href = p.download_url; } else { $('trial-dl').classList.add('hidden'); }
+        $('trial').classList.remove('hidden');
+      }
       if (p.stripe_ready) $('stripe-btn').classList.remove('hidden');
       loadPayPal();
       renderManual();

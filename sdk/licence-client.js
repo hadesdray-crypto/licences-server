@@ -18,7 +18,10 @@
  * Mises à jour : passez { version: '1.2.0' } ; quand vous publiez une version plus récente dans l'administration,
  * le client voit « Nouvelle version disponible » avec le lien de téléchargement.
  *
- * Utilisation avancée : activate(key), check(), deactivate(), getInfo(), onChange(fn), notifyUpdate()
+ * Essai gratuit : si le vendeur a réglé « Essai gratuit : N jours » dans l'administration, la fenêtre propose
+ * un bouton « Essayer gratuitement N jours » (un essai par appareil). Méthode : startTrial().
+ *
+ * Utilisation avancée : activate(key), check(), deactivate(), getInfo(), onChange(fn), notifyUpdate(), startTrial()
  */
 (function (root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
@@ -41,6 +44,7 @@
     this.onUpdateAvailable = opts.onUpdateAvailable || null;
     this._listeners = [];
     this._state = this._load();
+    if (opts.deviceId && String(opts.deviceId) !== this._state.deviceId) { this._state.deviceId = String(opts.deviceId); this._save(); } // identifiant matériel fourni par l'application (ex : Capacitor Device.getId())
   }
 
   LicenceClient.prototype._load = function () {
@@ -94,7 +98,8 @@
     var s = this._state;
     if (!s.key && !s.token) return { valid: false, reason: 'NO_KEY', message: 'Aucune clé enregistrée.' };
     var tokenOk = s.tokenExp && new Date(s.tokenExp).getTime() > Date.now();
-    var fresh = s.lastCheck && (Date.now() - s.lastCheck) < CHECK_INTERVAL_MS;
+    var since = Date.now() - (s.lastCheck || 0);
+    var fresh = !!s.lastCheck && since >= 0 && since < CHECK_INTERVAL_MS; // (horloge reculée = on revérifie)
     if (tokenOk && fresh && !force) return { valid: true, info: this.getInfo() };
     try {
       var r = await this._post('/api/verify', { key: s.key, token: s.token, device_id: this.getDeviceId(), device_name: this.deviceName, app: this.app });
@@ -112,6 +117,23 @@
     }
   };
 
+  /** Infos publiques du produit (essai gratuit disponible ?). */
+  LicenceClient.prototype.productInfo = async function () {
+    if (!this.app) return null;
+    try {
+      var res = await fetch(this.serverUrl + '/api/products/' + encodeURIComponent(this.app));
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (e) { return null; }
+  };
+
+  /** Démarre l'essai gratuit (si le vendeur l'a activé). Lève une erreur sinon (NO_TRIAL, TRIAL_USED…). */
+  LicenceClient.prototype.startTrial = async function (email) {
+    var r = await this._post('/api/trial', { app: this.app, device_id: this.getDeviceId(), device_name: this.deviceName, email: email || undefined });
+    this._store(r);
+    return this.getInfo();
+  };
+
   /** Libère cet appareil (pour utiliser la clé ailleurs) et oublie la clé localement. */
   LicenceClient.prototype.deactivate = async function () {
     var s = this._state;
@@ -125,6 +147,7 @@
     var l = s.license;
     var daysLeft = l.expires_at ? Math.ceil((new Date(l.expires_at).getTime() - Date.now()) / 86400000) : null;
     return { key: s.key, product: l.product, productName: l.product_name, lifetime: !!l.lifetime, expiresAt: l.expires_at, daysLeft: daysLeft, maxDevices: l.max_devices, devicesUsed: l.devices_used, lastCheck: s.lastCheck,
+      trial: l.trial === true || l.offer === 'Essai gratuit',
       latestVersion: l.latest_version || null, downloadUrl: l.download_url || null, changelog: l.changelog || '',
       updateAvailable: !!(this.version && l.latest_version && l.latest_version !== this.version) };
   };
@@ -155,7 +178,7 @@
     var res = await this.check();
     if (res.valid) {
       if (res.info && !res.info.lifetime && res.info.daysLeft !== null && res.info.daysLeft <= 7 && options.warnExpiry !== false) {
-        this._toast('Votre licence expire dans ' + res.info.daysLeft + ' jour' + (res.info.daysLeft > 1 ? 's' : '') + '.');
+        this._toast(res.info.trial ? 'Essai gratuit : encore ' + res.info.daysLeft + ' jour' + (res.info.daysLeft > 1 ? 's' : '') + '.' : 'Votre licence expire dans ' + res.info.daysLeft + ' jour' + (res.info.daysLeft > 1 ? 's' : '') + '.');
       }
       if (options.notifyUpdate !== false) this.notifyUpdate(res.info);
       return res.info;
@@ -163,8 +186,10 @@
     return this._showDialog(res, options);
   };
 
-  LicenceClient.prototype._showDialog = function (res, options) {
+  LicenceClient.prototype._showDialog = async function (res, options) {
     var self = this;
+    var product = await self.productInfo();
+    var trialDays = product && product.trial_days > 0 && !self._state.key && res.reason !== 'TRIAL_EXPIRED' && res.reason !== 'TRIAL_USED' ? product.trial_days : 0;
     return new Promise(function (resolve) {
       if (typeof document === 'undefined') { resolve(null); return; }
       var old = document.getElementById('licence-gate'); if (old) old.remove();
@@ -175,14 +200,16 @@
         '#licence-gate h2{margin:0 0 6px;font-size:20px}#licence-gate p{margin:0 0 14px;color:#475569;font-size:14px;line-height:1.4}' +
         '#licence-gate input{width:100%;box-sizing:border-box;padding:12px;font-size:17px;font-family:ui-monospace,Menlo,Consolas,monospace;border:1px solid #cbd5e1;border-radius:10px;text-transform:uppercase;letter-spacing:1px}' +
         '#licence-gate button{width:100%;margin-top:10px;padding:12px;font-size:16px;font-weight:600;border:0;border-radius:10px;background:#10b981;color:#052e16;cursor:pointer}#licence-gate button:disabled{opacity:.6}' +
-        '#licence-gate .err{color:#dc2626;font-size:14px;margin-top:10px;min-height:18px}#licence-gate a{color:#2563eb;font-size:14px}#licence-gate .foot{margin-top:14px;text-align:center}</style>' +
+        '#licence-gate .err{color:#dc2626;font-size:14px;margin-top:10px;min-height:18px}#licence-gate a{color:#2563eb;font-size:14px}#licence-gate .foot{margin-top:14px;text-align:center}' +
+        '#licence-gate button.trial{background:#2563eb;color:#fff}#licence-gate .or{text-align:center;color:#94a3b8;font-size:13px;margin:12px 0 2px}</style>' +
         '<div class="box"><h2>🔑 Activation requise</h2><p>Entrez votre clé de licence pour utiliser ' + esc(self.appName) + '.</p>' +
         '<input id="lg-key" placeholder="XXXXX-XXXX-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false">' +
         '<button id="lg-btn">Activer</button><div class="err" id="lg-err">' + (res.reason && res.reason !== 'NO_KEY' ? esc(res.message || '') : '') + '</div>' +
+        (trialDays ? '<div class="or">ou</div><button id="lg-trial" class="trial">🎁 Essayer gratuitement ' + trialDays + ' jour' + (trialDays > 1 ? 's' : '') + '</button>' : '') +
         (self.buyUrl ? '<div class="foot"><a href="' + esc(self.buyUrl) + '" target="_blank" rel="noopener">Acheter une licence ou retrouver ma clé</a></div>' : '') + '</div>';
       document.body.appendChild(wrap);
       var input = wrap.querySelector('#lg-key'), btn = wrap.querySelector('#lg-btn'), err = wrap.querySelector('#lg-err');
-      if (self._state.key) input.value = self._state.key;
+      if (self._state.key && res.reason !== 'TRIAL_EXPIRED' && !(self._state.license && self._state.license.trial)) input.value = self._state.key;
       setTimeout(function () { input.focus(); }, 50);
       async function submit() {
         err.textContent = ''; btn.disabled = true; btn.textContent = 'Vérification…';
@@ -198,6 +225,20 @@
       }
       btn.addEventListener('click', submit);
       input.addEventListener('keydown', function (e) { if (e.key === 'Enter') submit(); });
+      var tb = wrap.querySelector('#lg-trial');
+      if (tb) tb.addEventListener('click', async function () {
+        err.textContent = ''; tb.disabled = true; tb.textContent = 'Démarrage de l\'essai…';
+        try {
+          var info = await self.startTrial();
+          wrap.remove();
+          self._toast('Essai gratuit activé : ' + (info.daysLeft || trialDays) + ' jour' + ((info.daysLeft || trialDays) > 1 ? 's' : '') + '. Bonne découverte !');
+          if (options.onValid) options.onValid(info);
+          resolve(info);
+        } catch (e) {
+          err.textContent = e.message || 'Essai impossible';
+          tb.disabled = false; tb.textContent = '🎁 Essayer gratuitement ' + trialDays + ' jour' + (trialDays > 1 ? 's' : '');
+        }
+      });
     });
   };
 

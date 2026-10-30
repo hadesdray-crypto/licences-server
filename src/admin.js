@@ -11,7 +11,7 @@ import { paypalHealth } from './paypal.js';
 import { stripeHealth } from './stripe.js';
 import { ALL_SETTINGS, SECRET_SETTINGS, SETTING_TO_ENV, setSetting, deleteSetting } from './settings.js';
 
-export const VERSION = '1.2.0';
+export const VERSION = '1.3.0';
 
 export async function handleAdminApi(request, env, ctx, path, url) {
   const m = request.method;
@@ -160,7 +160,8 @@ async function stats(env) {
       (SELECT COALESCE(SUM(price_cents),0) FROM licenses WHERE created_at >= ?) AS revenue_month,
       (SELECT COALESCE(SUM(price_cents),0) FROM licenses) AS revenue_total,
       (SELECT COUNT(*) FROM licenses WHERE created_at >= ? AND price_cents > 0) AS sales_month,
-      (SELECT COUNT(*) FROM licenses WHERE status='active' AND activated_at IS NOT NULL AND (expires_at IS NULL OR expires_at >= ?)) AS active,
+      (SELECT COUNT(*) FROM licenses WHERE status='active' AND source <> 'trial' AND activated_at IS NOT NULL AND (expires_at IS NULL OR expires_at >= ?)) AS active,
+      (SELECT COUNT(*) FROM licenses WHERE status='active' AND source = 'trial' AND (expires_at IS NULL OR expires_at >= ?)) AS trials_active,
       (SELECT COUNT(*) FROM licenses WHERE status='active' AND activated_at IS NULL AND source <> 'stock') AS pending,
       (SELECT COUNT(*) FROM licenses WHERE status='active' AND source='stock') AS stock,
       (SELECT COUNT(*) FROM licenses WHERE status='active' AND expires_at IS NOT NULL AND expires_at >= ? AND expires_at < ?) AS expiring_7d,
@@ -172,17 +173,17 @@ async function stats(env) {
       (SELECT COALESCE(SUM(requests),0) FROM stats_daily WHERE day >= ?) AS requests_7d,
       (SELECT COUNT(*) FROM events WHERE type IN ('paypal_error','stripe_error','webhook_error','webhook_rejected','email_failed') AND created_at >= ?) AS errors_7d,
       (SELECT COUNT(*) FROM orders WHERE status='pending') AS orders_pending`,
-  ).bind(monthStart, monthStart, now, now, in7, now, today, sevenDaysAgo, addDays(now, -7)).first();
+  ).bind(monthStart, monthStart, now, now, now, in7, now, today, sevenDaysAgo, addDays(now, -7)).first();
 
   const months = (await env.DB.prepare(
     `SELECT substr(created_at,1,7) AS month, COALESCE(SUM(price_cents),0) AS revenue, COUNT(*) AS count
-     FROM licenses WHERE created_at >= ? AND source <> 'stock' GROUP BY month ORDER BY month`,
+     FROM licenses WHERE created_at >= ? AND source NOT IN ('stock','trial') GROUP BY month ORDER BY month`,
   ).bind(addDays(now, -180).slice(0, 7) + '-01').all()).results || [];
 
   const byProduct = (await env.DB.prepare(
     `SELECT p.id, p.name, COUNT(l.id) AS licenses, COALESCE(SUM(l.price_cents),0) AS revenue,
             SUM(CASE WHEN l.status='active' AND l.activated_at IS NOT NULL AND (l.expires_at IS NULL OR l.expires_at >= ?) THEN 1 ELSE 0 END) AS active
-     FROM products p LEFT JOIN licenses l ON l.product_id = p.id AND l.source <> 'stock' GROUP BY p.id ORDER BY revenue DESC, p.name`,
+     FROM products p LEFT JOIN licenses l ON l.product_id = p.id AND l.source NOT IN ('stock','trial') GROUP BY p.id ORDER BY revenue DESC, p.name`,
   ).bind(now).all()).results || [];
 
   const events = await recentEvents(env, 12, false);
@@ -270,7 +271,7 @@ async function exportSales(env) {
     `SELECT l.id, l.created_at, p.name AS product, l.offer_label, l.duration_days, l.price_cents, l.source, l.payment_method, l.paypal_order_id, l.stripe_session_id,
             c.email AS customer_email, c.name AS customer_name, l.status, l.activated_at, l.expires_at, l.key, l.note
      FROM licenses l JOIN products p ON p.id=l.product_id LEFT JOIN customers c ON c.id=l.customer_id
-     WHERE l.source <> 'stock' ORDER BY l.id`,
+     WHERE l.source NOT IN ('stock','trial') ORDER BY l.id`,
   ).all()).results || [];
   const esc = (v) => { const s = String(v ?? ''); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
   const head = ['N°', 'Date', 'Application', 'Formule', 'Durée (jours)', 'Prix (€)', 'Paiement', 'Référence paiement', 'Email client', 'Nom client', 'État', 'Activée le', 'Expire le', 'Clé', 'Note'];
@@ -304,7 +305,8 @@ async function listEvents(env, q) {
 
 async function listProducts(env) {
   const products = (await env.DB.prepare(
-    `SELECT p.*, (SELECT COUNT(*) FROM licenses l WHERE l.product_id=p.id AND l.source <> 'stock') AS licenses_count,
+    `SELECT p.*, (SELECT COUNT(*) FROM licenses l WHERE l.product_id=p.id AND l.source NOT IN ('stock','trial')) AS licenses_count,
+            (SELECT COUNT(*) FROM licenses l WHERE l.product_id=p.id AND l.source = 'trial') AS trials_count,
             (SELECT COUNT(*) FROM licenses l WHERE l.product_id=p.id AND l.source = 'stock' AND l.status='active') AS stock_count,
             (SELECT COALESCE(SUM(price_cents),0) FROM licenses l WHERE l.product_id=p.id) AS revenue
      FROM products p ORDER BY p.active DESC, p.name`,
@@ -336,6 +338,7 @@ async function saveProduct(env, body, id) {
   const version = String(body.version || '').trim().slice(0, 30);
   const changelog = String(body.changelog || '').trim().slice(0, 2000);
   const max_devices = clampInt(body.max_devices, 1, 100, 2);
+  const trial_days = clampInt(body.trial_days, 0, 365, 0);
   const active = body.active === false || body.active === 0 ? 0 : 1;
   const offers = Array.isArray(body.offers) ? body.offers : [];
 
@@ -351,12 +354,12 @@ async function saveProduct(env, body, id) {
       const before = await getProduct(env, id);
       versionChanged = before && version && before.version !== version;
       await env.DB.prepare(
-        'UPDATE products SET slug=?, name=?, description=?, download_url=?, key_prefix=?, max_devices=?, version=?, changelog=?, active=? WHERE id=?',
-      ).bind(slug, name, description, download_url, key_prefix, max_devices, version, changelog, active, id).run();
+        'UPDATE products SET slug=?, name=?, description=?, download_url=?, key_prefix=?, max_devices=?, version=?, changelog=?, trial_days=?, active=? WHERE id=?',
+      ).bind(slug, name, description, download_url, key_prefix, max_devices, version, changelog, trial_days, active, id).run();
     } else {
       const row = await env.DB.prepare(
-        'INSERT INTO products(slug, name, description, download_url, key_prefix, max_devices, version, changelog, active) VALUES(?,?,?,?,?,?,?,?,?) RETURNING id',
-      ).bind(slug, name, description, download_url, key_prefix, max_devices, version, changelog, active).first();
+        'INSERT INTO products(slug, name, description, download_url, key_prefix, max_devices, version, changelog, trial_days, active) VALUES(?,?,?,?,?,?,?,?,?,?) RETURNING id',
+      ).bind(slug, name, description, download_url, key_prefix, max_devices, version, changelog, trial_days, active).first();
       id = row.id;
       await logEvent(env, 'product_created', null, name);
     }
@@ -392,9 +395,12 @@ async function saveProduct(env, body, id) {
 }
 
 async function deleteProduct(env, id) {
-  const n = (await env.DB.prepare("SELECT COUNT(*) AS n FROM licenses WHERE product_id=? AND source <> 'stock'").bind(id).first()).n;
+  const n = (await env.DB.prepare("SELECT COUNT(*) AS n FROM licenses WHERE product_id=? AND source NOT IN ('stock','trial')").bind(id).first()).n;
   if (n > 0) err(409, `Impossible de supprimer : ${n} licence(s) existent pour cette application. Désactivez-la plutôt.`);
-  await env.DB.prepare("DELETE FROM licenses WHERE product_id=? AND source='stock'").bind(id).run();
+  // Les clés de réserve et les essais gratuits (jamais payés) sont supprimés avec l'application
+  await env.DB.prepare("DELETE FROM devices WHERE license_id IN (SELECT id FROM licenses WHERE product_id=? AND source IN ('stock','trial'))").bind(id).run();
+  await env.DB.prepare("DELETE FROM events WHERE license_id IN (SELECT id FROM licenses WHERE product_id=? AND source IN ('stock','trial'))").bind(id).run();
+  await env.DB.prepare("DELETE FROM licenses WHERE product_id=? AND source IN ('stock','trial')").bind(id).run();
   await env.DB.prepare('DELETE FROM offers WHERE product_id=?').bind(id).run();
   await env.DB.prepare('DELETE FROM products WHERE id=?').bind(id).run();
   return json({ ok: true });
@@ -490,6 +496,7 @@ function stateClause(state, now) {
     case 'expiring': return { sql: "l.status='active' AND l.expires_at IS NOT NULL AND l.expires_at >= ? AND l.expires_at < ?", params: [now, addDays(now, 7)] };
     case 'revoked': return { sql: "l.status='revoked'", params: [] };
     case 'stock': return { sql: "l.source='stock' AND l.status='active'", params: [] };
+    case 'trial': return { sql: "l.source='trial'", params: [] };
     default: return null;
   }
 }

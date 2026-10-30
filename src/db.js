@@ -43,7 +43,7 @@ export async function ensureSchema(env) {
     }
     // 2) colonnes ajoutées au fil des versions
     const wanted = {
-      products: [['version', "TEXT NOT NULL DEFAULT ''"], ['changelog', "TEXT NOT NULL DEFAULT ''"]],
+      products: [['version', "TEXT NOT NULL DEFAULT ''"], ['changelog', "TEXT NOT NULL DEFAULT ''"], ['trial_days', 'INTEGER NOT NULL DEFAULT 0']],
       licenses: [['payment_method', "TEXT NOT NULL DEFAULT ''"], ['stripe_session_id', 'TEXT'], ['stripe_payment_intent', 'TEXT']],
     };
     for (const [table, cols] of Object.entries(wanted)) {
@@ -128,7 +128,7 @@ export async function listOffers(env, productId, onlyActive = false) {
 }
 
 const LICENSE_SELECT = `
-  SELECT l.*, p.name AS product_name, p.slug AS product_slug, p.download_url AS product_download_url, p.active AS product_active,
+  SELECT l.*, p.name AS product_name, p.slug AS product_slug, p.download_url AS product_download_url, p.active AS product_active, p.trial_days AS product_trial_days,
          p.version AS product_version, p.changelog AS product_changelog,
          c.email AS customer_email, c.name AS customer_name,
          (SELECT COUNT(*) FROM devices d WHERE d.license_id = l.id) AS devices_used
@@ -175,7 +175,7 @@ export function licenseView(row, now = nowIso()) {
   const state = licenseState(row, now);
   let days_left = null;
   if (row.expires_at) days_left = Math.ceil((new Date(row.expires_at).getTime() - new Date(now).getTime()) / 86400000);
-  return { ...row, state, days_left, lifetime: row.duration_days === 0 };
+  return { ...row, state, days_left, lifetime: row.duration_days === 0, trial: row.source === 'trial' };
 }
 
 /**
@@ -199,7 +199,7 @@ export async function createLicense(env, opts) {
         price_cents, source, paypal_order_id, note, payment_method || (source === 'paypal' ? 'paypal' : source === 'stripe' ? 'stripe' : ''),
         stripe_session_id, stripe_payment_intent).first();
       if (source !== 'stock') {
-        await logEvent(env, source === 'paypal' ? 'sale' : 'license_created', row.id,
+        await logEvent(env, source === 'paypal' ? 'sale' : source === 'trial' ? 'trial_started' : 'license_created', row.id,
           `${product.name} · ${offer_label || duration_days + ' j'}${price_cents ? ' · ' + (price_cents / 100).toFixed(2) + ' €' : ''}`);
       }
       return getLicense(env, row.id);

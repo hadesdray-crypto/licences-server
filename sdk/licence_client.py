@@ -20,6 +20,7 @@ import uuid
 import platform
 import urllib.request
 import urllib.error
+import urllib.parse
 
 CHECK_INTERVAL = 24 * 3600  # revérification en ligne toutes les 24 h
 
@@ -123,6 +124,22 @@ class LicenceClient:
                 return True, "Hors ligne (jeton encore valide)"
             return False, "Connexion au serveur impossible. Reconnectez-vous à Internet pour vérifier la licence."
 
+    def product_info(self):
+        """Infos publiques du produit (dont trial_days : essai gratuit)."""
+        if not self.app:
+            return None
+        try:
+            with urllib.request.urlopen(self.server_url + "/api/products/" + urllib.parse.quote(self.app), timeout=15) as res:
+                return json.loads(res.read().decode("utf-8"))
+        except Exception:
+            return None
+
+    def start_trial(self, email=None):
+        """Démarre l'essai gratuit sur cet appareil (si le vendeur l'a activé). Lève LicenceError sinon."""
+        r = self._post("/api/trial", {"app": self.app, "device_id": self.device_id(), "device_name": self.device_name, "email": email})
+        self._store(r)
+        return self.info()
+
     def deactivate(self):
         """Libère cet appareil pour utiliser la clé ailleurs."""
         if self._state.get("key"):
@@ -143,6 +160,7 @@ class LicenceClient:
         latest = lic.get("latest_version") or None
         return {"key": self._state.get("key"), "product": lic.get("product"), "product_name": lic.get("product_name"), "lifetime": lic.get("lifetime"), "expires_at": lic.get("expires_at"), "days_left": days_left, "max_devices": lic.get("max_devices"), "devices_used": lic.get("devices_used"),
                 "latest_version": latest, "download_url": lic.get("download_url") or None, "changelog": lic.get("changelog") or "",
+                "trial": bool(lic.get("trial")) or lic.get("offer") == "Essai gratuit",
                 "update_available": bool(self.version and latest and latest != self.version)}
 
     def gate(self, max_tries=5):
@@ -151,7 +169,10 @@ class LicenceClient:
         if valid:
             inf = self.info()
             if inf and inf.get("days_left") is not None and inf["days_left"] <= 7:
-                print(f"⚠️  Votre licence expire dans {inf['days_left']} jour(s).")
+                if inf.get("trial"):
+                    print(f"🎁 Essai gratuit : encore {inf['days_left']} jour(s)." + (f" Acheter : {self.buy_url}" if self.buy_url else ""))
+                else:
+                    print(f"⚠️  Votre licence expire dans {inf['days_left']} jour(s).")
             if inf and inf.get("update_available"):
                 print(f"⬆️  Nouvelle version {inf['latest_version']} disponible : {inf.get('download_url') or ''}")
             return inf
@@ -160,10 +181,22 @@ class LicenceClient:
             print(f"   {msg}")
         if self.buy_url:
             print(f"   Acheter une licence / retrouver ma clé : {self.buy_url}")
+        info_p = self.product_info() or {}
+        trial_days = info_p.get("trial_days") or 0
+        if trial_days and not self._state.get("key"):
+            print(f"   Tapez ESSAI pour essayer gratuitement {trial_days} jour(s).")
         for _ in range(max_tries):
             key = input("Clé de licence : ").strip()
             if not key:
                 continue
+            if trial_days and key.upper() == "ESSAI":
+                try:
+                    inf = self.start_trial()
+                    print(f"✅ Essai gratuit activé jusqu'au {inf['expires_at'][:10]}.")
+                    return inf
+                except LicenceError as e:
+                    print(f"❌ {e}")
+                    continue
             try:
                 inf = self.activate(key)
                 print(f"✅ Licence activée ({'à vie' if inf['lifetime'] else 'jusqu\'au ' + inf['expires_at'][:10]}).")

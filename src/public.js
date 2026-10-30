@@ -5,6 +5,7 @@ import { signToken, verifyToken } from './crypto.js';
 import { licenseSecret } from './auth.js';
 import {
   getLicense, getLicenseByKey, getProductBySlug, listOffers, licenseView, logEvent, rateLimited, enabledManualMethods, methodLabel,
+  upsertCustomer, createLicense,
 } from './db.js';
 import { randomCode, randomHex } from './crypto.js';
 import { sendRecoveryEmail, sendOrderInstructionsEmail, sendSellerOrderNotification } from './email.js';
@@ -23,6 +24,7 @@ export async function handlePublicApi(request, env, ctx, path, url) {
   if (path.startsWith('/products/') && m === 'GET') return publicProduct(env, path.slice('/products/'.length));
   if ((path === '/activate' || path === '/verify') && m === 'POST') return activate(env, ctx, await readJson(request));
   if (path === '/lookup' && m === 'POST') return lookup(request, env, await readJson(request), url.origin);
+  if (path === '/trial' && m === 'POST') return startTrial(request, env, ctx, await readJson(request));
   if (path === '/orders' && m === 'POST') return createOrder(request, env, ctx, await readJson(request), url.origin);
   if (path.startsWith('/orders/') && m === 'GET') return orderStatus(env, path.slice('/orders/'.length), url.searchParams.get('t') || '', url.origin);
   if (path === '/deactivate' && m === 'POST') return deactivate(env, await readJson(request));
@@ -38,7 +40,9 @@ async function publicProduct(env, slug) {
   const offers = (await listOffers(env, product.id, true)).map((o) => ({ id: o.id, label: o.label, days: o.days, price_cents: o.price_cents }));
   return json({
     slug: product.slug, name: product.name, description: product.description, max_devices: product.max_devices,
-    version: product.version || '', offers, currency: env.CURRENCY || 'EUR',
+    version: product.version || '', trial_days: product.trial_days || 0,
+    ...(product.trial_days > 0 ? { download_url: product.download_url || '' } : {}),   // public seulement si un essai gratuit existe
+    offers, currency: env.CURRENCY || 'EUR',
     paypal_ready: paypalConfigured(env), paypal_env: env.PAYPAL_ENV === 'live' ? 'live' : 'sandbox',
     stripe_ready: stripeConfigured(env),
     manual_methods: enabledManualMethods(env),
@@ -93,6 +97,7 @@ export async function checkAndIssue(env, ctx, license, deviceId, deviceName) {
   }
 
   if (license.expires_at && license.expires_at < now) {
+    if (license.source === 'trial') err(403, 'Votre période d\'essai gratuit est terminée. Achetez une licence pour continuer.', 'TRIAL_EXPIRED');
     err(403, `Licence expirée le ${license.expires_at.slice(0, 10)}. Renouvelez-la auprès du vendeur.`, 'EXPIRED');
   }
 
@@ -134,6 +139,7 @@ export async function checkAndIssue(env, ctx, license, deviceId, deviceName) {
       days_left: view.days_left,
       max_devices: license.max_devices,
       devices_used: devicesUsed,
+      trial: license.source === 'trial',
       download_url: license.product_download_url || '',
       latest_version: license.product_version || '',
       changelog: license.product_changelog || '',
@@ -168,6 +174,40 @@ async function lookup(request, env, body, origin) {
     devices_used: v.devices_used,
     buy_url: `${origin}/buy/${license.product_slug}`,
   });
+}
+
+/**
+ * Essai gratuit : l'application appelle cette route au premier lancement ; une licence « trial » de N jours
+ * est créée et activée pour cet appareil. Un seul essai par appareil et par application.
+ * Entrée : { app, device_id, device_name?, email? }
+ */
+async function startTrial(request, env, ctx, body) {
+  const ip = request.headers.get('cf-connecting-ip') || 'local';
+  if (await rateLimited(env, `trial:${ip}`, 20)) err(429, 'Trop de demandes. Réessayez plus tard.');
+  const product = await getProductBySlug(env, String(body.app || ''));
+  if (!product || !product.active) err(404, 'Application introuvable');
+  if (!product.trial_days) err(403, 'Cette application ne propose pas d\'essai gratuit.', 'NO_TRIAL');
+  const deviceId = String(body.device_id || '').trim().slice(0, 128);
+  if (!deviceId) err(400, "Identifiant d'appareil manquant (device_id)", 'MISSING_DEVICE');
+  const deviceName = String(body.device_name || '').trim().slice(0, 80);
+
+  const used = await env.DB.prepare(
+    "SELECT l.id FROM licenses l JOIN devices d ON d.license_id = l.id WHERE l.product_id=? AND l.source='trial' AND d.device_id=? ORDER BY l.id DESC LIMIT 1",
+  ).bind(product.id, deviceId).first();
+  if (used) {
+    const existing = await getLicense(env, used.id);
+    if (existing.status === 'revoked' || (existing.expires_at && existing.expires_at < nowIso())) {
+      err(403, 'La période d\'essai a déjà été utilisée sur cet appareil. Achetez une licence pour continuer.', 'TRIAL_USED');
+    }
+    return json(await checkAndIssue(env, ctx, existing, deviceId, deviceName)); // essai encore en cours : on le renvoie
+  }
+  let customer = null;
+  if (body.email && isEmail(body.email)) customer = await upsertCustomer(env, body.email, body.name);
+  const license = await createLicense(env, {
+    product, customer_id: customer ? customer.id : null, offer_label: 'Essai gratuit', duration_days: product.trial_days,
+    max_devices: 1, price_cents: 0, source: 'trial', payment_method: 'trial', note: deviceName,
+  });
+  return json(await checkAndIssue(env, ctx, license, deviceId, deviceName));
 }
 
 /** Libère un appareil (le client change d'ordinateur). */

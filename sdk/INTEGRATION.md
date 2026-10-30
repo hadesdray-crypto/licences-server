@@ -31,6 +31,10 @@ Deux modules prêts à l'emploi sont fournis. **Envoyez-moi le code de Youpub et
 
 `gate()` affiche une fenêtre « Activation requise » en français, avec un lien « Acheter une licence ou retrouver ma clé » vers votre page de vente. Tant que la clé n'est pas valide, l'application reste masquée.
 
+**Essai gratuit** : si vous avez réglé « Essai gratuit : N jours » dans la fiche de l'application (administration), la même fenêtre propose automatiquement un bouton « 🎁 Essayer gratuitement N jours ». Rien à coder. À la fin de l'essai, `gate()` rebloque l'application avec le message « essai terminé » (code `TRIAL_EXPIRED`) ; un nouvel essai sur le même appareil est refusé (`TRIAL_USED`). `getInfo().trial` vaut `true` pendant un essai.
+
+**Application Android/iOS avec Capacitor** : l'identifiant d'appareil est généré et conservé par le module (stockage local de l'application). Pour qu'un essai ne puisse pas être relancé en effaçant les données de l'app, passez l'identifiant matériel : `new LicenceClient({ …, deviceId: (await Device.getId()).identifier })` (plugin `@capacitor/device`).
+
 Fonctions utiles :
 
 | Fonction | Rôle |
@@ -41,6 +45,8 @@ Fonctions utiles :
 | `licence.deactivate()` | Libère cet appareil (menu « Utiliser ma clé sur un autre ordinateur ») |
 | `licence.getInfo()` | `{ productName, expiresAt, daysLeft, lifetime, maxDevices, devicesUsed, latestVersion, downloadUrl, updateAvailable }` pour afficher « Licence valable jusqu'au… » |
 | `licence.notifyUpdate()` | Affiche la notification « Nouvelle version » (appelée automatiquement par `gate()`) |
+| `licence.startTrial()` | Démarre l'essai gratuit sur cet appareil (fait par le bouton de `gate()` ; utile si vous faites votre propre fenêtre) |
+| `licence.productInfo()` | Infos publiques du produit : `{ trial_days, offers, download_url… }` |
 
 ## Application Python
 
@@ -52,7 +58,7 @@ licence.gate()   # console : demande la clé si besoin
 # ✅ démarrez l'application
 ```
 
-Pour une interface graphique (Tkinter, PyQt), utilisez `licence.check()` puis `licence.activate(cle)` et affichez votre propre boîte de dialogue.
+Pour une interface graphique (Tkinter, PyQt), utilisez `licence.check()` puis `licence.activate(cle)` et affichez votre propre boîte de dialogue. Essai gratuit : `licence.product_info()["trial_days"]` puis `licence.start_trial()` (en mode console, `gate()` propose de taper `ESSAI`).
 
 ## Autre langage (C#, Java, Swift, Kotlin, Go…)
 
@@ -90,6 +96,9 @@ Erreurs (`4xx`, corps `{ "error": "message en français", "code": "…" }`) :
 | `PRODUCT_DISABLED` | application retirée de la vente |
 
 Règle côté application : **une erreur `4xx` bloque l'application** ; une erreur réseau (pas de réponse) laisse passer tant que `token_expires_at` n'est pas dépassé.
+
+### `POST /api/trial`
+`{ "app": "youpub", "device_id": "…", "device_name": "…", "email": "facultatif" }` → démarre l'essai gratuit (même réponse que `/api/activate`, avec `license.trial = true`). Erreurs : `NO_TRIAL` (pas d'essai pour cette application), `TRIAL_USED` (déjà utilisé sur cet appareil). Pendant un essai en cours, rappeler cette route renvoie le même essai.
 
 ### `POST /api/deactivate`
 `{ "key": "…", "device_id": "…" }` → libère l'appareil.
