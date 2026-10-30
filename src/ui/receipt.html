@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reçu __NUMBER__</title>
+<meta name="robots" content="noindex">
+<style>
+  body { margin:0; background:#eceff3; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; color:#111; }
+  .page { max-width:720px; margin:24px auto; background:#fff; padding:40px 44px; box-shadow:0 2px 12px rgba(0,0,0,.08); }
+  .head { display:flex; justify-content:space-between; gap:24px; flex-wrap:wrap; margin-bottom:28px }
+  .seller { font-size:14px; line-height:1.5; white-space:pre-line } .seller b { font-size:17px }
+  .meta { text-align:right; font-size:14px; line-height:1.6 } .meta h1 { margin:0 0 4px; font-size:24px; letter-spacing:.5px }
+  .block { margin:18px 0; font-size:14px; line-height:1.5 } .block .l { color:#666; font-size:12px; text-transform:uppercase; letter-spacing:.5px }
+  table { width:100%; border-collapse:collapse; margin:18px 0; font-size:14px }
+  th { text-align:left; background:#f3f4f6; padding:10px; font-weight:600; border-bottom:1px solid #ddd } td { padding:10px; border-bottom:1px solid #eee } .r { text-align:right }
+  .total td { font-weight:700; font-size:16px; border-top:2px solid #111; border-bottom:0 }
+  .note { font-size:12px; color:#555; margin-top:20px; line-height:1.5 }
+  .toolbar { max-width:720px; margin:12px auto 0; padding:0 8px; display:flex; gap:8px; justify-content:flex-end }
+  .btn { padding:10px 16px; border-radius:8px; border:0; background:#2563eb; color:#fff; font-weight:600; cursor:pointer; font-size:14px }
+  @media print { body { background:#fff } .page { box-shadow:none; margin:0; max-width:none; padding:0 } .toolbar { display:none } }
+</style>
+</head>
+<body>
+<div class="toolbar"><button class="btn" onclick="window.print()">Imprimer / Enregistrer en PDF</button></div>
+<div class="page">
+  <div class="head">
+    <div class="seller"><b>__SELLER_NAME__</b>
+__SELLER_ADDRESS__
+__SELLER_CONTACT__
+__SELLER_SIRET__</div>
+    <div class="meta"><h1>REÇU</h1>N° <b>__NUMBER__</b><br>Date : __DATE__<br>__PAYMENT__</div>
+  </div>
+  <div class="block"><div class="l">Client</div>__CUSTOMER__</div>
+  <table>
+    <thead><tr><th>Désignation</th><th class="r">Quantité</th><th class="r">Montant</th></tr></thead>
+    <tbody>
+      <tr><td>Licence <b>__PRODUCT__</b> – __OFFER__<br><span style="color:#666;font-size:12px">Clé : __KEY__ · Accès __DURATION__ · __DEVICES__ appareil(s)</span></td><td class="r">1</td><td class="r">__AMOUNT__</td></tr>
+      <tr class="total"><td colspan="2">Total payé</td><td class="r">__AMOUNT__</td></tr>
+    </tbody>
+  </table>
+  <div class="note">__VAT_NOTE__<br>Licence d'utilisation personnelle, non transférable, valable pour la durée indiquée à compter de la première activation. Paiement reçu, aucun montant restant dû.</div>
+</div>
+</body>
+</html>

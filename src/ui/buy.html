@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__NAME__ – Acheter</title>
+<meta name="robots" content="noindex">
+<style>
+  :root { --bg:#f6f7fb; --card:#fff; --text:#0f172a; --muted:#64748b; --line:#e2e8f0; --accent:#2563eb; --ok:#059669; --err:#dc2626; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0b1220; --card:#111a2e; --text:#e5e7eb; --muted:#94a3b8; --line:#1f2a44; } }
+  * { box-sizing:border-box }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--text); line-height:1.45 }
+  .wrap { max-width:520px; margin:0 auto; padding:24px 16px 48px }
+  .brand { color:var(--muted); font-size:13px; margin-bottom:6px }
+  h1 { font-size:26px; margin:0 0 8px }
+  .desc { color:var(--muted); margin:0 0 20px; white-space:pre-line }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px; margin-bottom:16px }
+  h2 { font-size:16px; margin:0 0 12px } h3 { font-size:14px; margin:18px 0 8px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px }
+  .offer { display:flex; align-items:center; gap:12px; padding:12px; border:1px solid var(--line); border-radius:10px; margin-bottom:8px; cursor:pointer }
+  .offer:has(input:checked) { border-color:var(--accent); background:rgba(37,99,235,.06) }
+  .offer input { width:18px; height:18px; accent-color:var(--accent) }
+  .offer .l { flex:1 } .offer .p { font-weight:700 }
+  .offer small { color:var(--muted); display:block }
+  label.f { display:block; font-size:13px; color:var(--muted); margin:14px 0 6px }
+  input[type=email], input[type=text] { width:100%; padding:12px; font-size:16px; border:1px solid var(--line); border-radius:10px; background:transparent; color:var(--text) }
+  .hint { color:var(--muted); font-size:13px; margin-top:8px }
+  .msg { padding:12px; border-radius:10px; margin-top:12px; font-size:14px; display:none }
+  .msg.err { display:block; background:rgba(220,38,38,.1); color:var(--err) }
+  .msg.ok { display:block; background:rgba(5,150,105,.1); color:var(--ok) }
+  #paypal-buttons { margin-top:12px; min-height:0 }
+  .key { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:20px; letter-spacing:1px; background:#0f172a; color:#fff; padding:14px; border-radius:10px; text-align:center; word-break:break-all; margin:12px 0 }
+  .ref { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:22px; letter-spacing:1px; background:#0f172a; color:#fff; padding:12px; border-radius:10px; text-align:center; margin:10px 0 }
+  .btn { display:block; width:100%; text-align:center; padding:13px; border-radius:10px; font-weight:600; text-decoration:none; border:0; font-size:16px; cursor:pointer; margin-top:10px }
+  .btn.primary { background:var(--accent); color:#fff } .btn.ghost { background:transparent; border:1px solid var(--line); color:var(--text) }
+  .btn.card-btn { background:#0f172a; color:#fff } .btn:disabled { opacity:.6 }
+  .steps { padding-left:18px; color:var(--muted); font-size:14px } .steps li { margin:4px 0 }
+  .instr { white-space:pre-line; background:var(--bg); border-radius:10px; padding:12px; font-size:15px; margin-top:8px }
+  details summary { cursor:pointer; color:var(--muted); font-size:14px }
+  .foot { color:var(--muted); font-size:12px; text-align:center; margin-top:24px }
+  .hidden { display:none }
+  .manual { display:flex; flex-wrap:wrap; gap:8px; margin-top:4px }
+  .manual button { flex:1 1 45%; padding:11px; border-radius:10px; border:1px solid var(--line); background:transparent; color:var(--text); font-weight:600; cursor:pointer; font-size:15px }
+  .manual button.on { border-color:var(--accent); background:rgba(37,99,235,.08) }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">__BRAND__</div>
+  <h1>__NAME__</h1>
+  <p class="desc" id="desc"></p>
+
+  <div class="card" id="buy">
+    <h2>1. Choisissez votre formule</h2>
+    <div id="offers"><p class="hint">Chargement…</p></div>
+    <label class="f" for="email">Votre adresse email (pour recevoir votre clé)</label>
+    <input type="email" id="email" placeholder="vous@exemple.fr" autocomplete="email" inputmode="email">
+
+    <h2 style="margin-top:22px">2. Payez</h2>
+    <div id="online">
+      <button class="btn card-btn hidden" id="stripe-btn">💳 Payer par carte bancaire</button>
+      <div id="paypal-buttons"></div>
+    </div>
+    <div id="manual-wrap" class="hidden">
+      <h3>Autres moyens de paiement</h3>
+      <div class="manual" id="manual"></div>
+      <div id="manual-form" class="hidden">
+        <label class="f" for="name">Votre nom (facultatif)</label>
+        <input type="text" id="name" placeholder="Prénom Nom" autocomplete="name">
+        <button class="btn primary" id="order-btn">Commander et recevoir les consignes de paiement</button>
+        <p class="hint">Vous recevez les consignes par email et sur une page de suivi. Dès que le vendeur confirme votre paiement, votre clé vous est envoyée.</p>
+      </div>
+    </div>
+    <p class="hint" id="pp-hint"></p>
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <div class="card hidden" id="ordered">
+    <h2>⏳ Commande enregistrée</h2>
+    <p>Votre référence :</p>
+    <div class="ref" id="o-ref"></div>
+    <p><b id="o-product"></b> · <b id="o-amount"></b> par <span id="o-method"></span></p>
+    <p style="margin:12px 0 4px"><b>Comment payer :</b></p>
+    <div class="instr" id="o-instr"></div>
+    <p class="hint">Indiquez la référence lors du paiement. Dès que le vendeur confirme la réception, votre clé apparaît sur votre page de suivi et vous arrive par email.</p>
+    <a class="btn primary" id="o-link" href="#">Ouvrir ma page de suivi</a>
+    <p class="hint" id="o-email"></p>
+  </div>
+
+  <div class="card hidden" id="done">
+    <h2>✅ Merci, votre paiement est confirmé</h2>
+    <p>Voici votre clé d'accès pour <b id="done-name"></b> (<span id="done-offer"></span>) :</p>
+    <div class="key" id="done-key"></div>
+    <button class="btn ghost" id="copy">Copier la clé</button>
+    <p class="hint" id="done-email"></p>
+    <a class="btn primary hidden" id="download" href="#" target="_blank" rel="noopener">Télécharger l'application</a>
+    <h2 style="margin-top:18px">Comment l'activer</h2>
+    <ol class="steps">
+      <li>Installez et ouvrez l'application.</li>
+      <li>Au premier démarrage (ou dans le menu <i>Licence</i>), collez la clé ci-dessus.</li>
+      <li>Validez : l'application se débloque immédiatement.</li>
+    </ol>
+    <p class="hint">Durée : <span id="done-duration"></span>, à partir de la première activation. Appareils autorisés : <span id="done-devices"></span>.</p>
+  </div>
+
+  <div class="card">
+    <details>
+      <summary>Déjà acheté ? Retrouver ma clé</summary>
+      <label class="f" for="rec-email">Email utilisé lors de l'achat</label>
+      <input type="email" id="rec-email" placeholder="vous@exemple.fr">
+      <button class="btn ghost" id="rec-btn">Recevoir mes clés par email</button>
+      <div class="msg" id="rec-msg"></div>
+      <p class="hint">Ou tapez votre code sur <a href="__ORIGIN__/go">la page « J'ai un code »</a>.</p>
+    </details>
+  </div>
+
+  <p class="foot">Achat définitif, valable pour la durée indiquée. Une clé est personnelle et limitée à un nombre d'appareils.</p>
+</div>
+
+<script>
+(function () {
+  var SLUG = '__SLUG__', CLIENT_ID = '__CLIENT_ID__', CURRENCY = '__CURRENCY__', ORIGIN = '__ORIGIN__';
+  var $ = function (id) { return document.getElementById(id); };
+  var product = null, selectedMethod = null;
+
+  function fmt(cents) { try { return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: CURRENCY }).format(cents / 100); } catch (e) { return (cents / 100).toFixed(2) + ' ' + CURRENCY; } }
+  function duration(days) {
+    if (!days) return 'illimitée';
+    if (days % 365 === 0) return days / 365 === 1 ? '1 an' : (days / 365) + ' ans';
+    if (days % 30 === 0) return (days / 30) + ' mois';
+    if (days % 7 === 0) return days / 7 === 1 ? '1 semaine' : (days / 7) + ' semaines';
+    return days + ' jours';
+  }
+  function showMsg(el, text, cls) { el.textContent = text; el.className = 'msg ' + (cls || 'err'); }
+  function hideMsg(el) { el.className = 'msg'; el.textContent = ''; }
+  function selectedOffer() { var r = document.querySelector('input[name=offer]:checked'); return r ? Number(r.value) : null; }
+  function email() { return ($('email').value || '').trim(); }
+  function validEmail(e) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e); }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function checkForm() { hideMsg($('msg')); if (!selectedOffer()) { showMsg($('msg'), 'Choisissez une formule.'); return false; } if (!validEmail(email())) { showMsg($('msg'), 'Indiquez une adresse email valide : votre clé y sera envoyée.'); $('email').focus(); return false; } return true; }
+
+  async function post(path, body) {
+    var res = await fetch(ORIGIN + path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+    var data = null; try { data = await res.json(); } catch (e) {}
+    if (!res.ok) throw new Error((data && data.error) || ('Erreur ' + res.status));
+    return data;
+  }
+
+  function renderOffers() {
+    var box = $('offers');
+    if (!product.offers.length) { box.innerHTML = '<p class="hint">Aucune formule disponible pour le moment.</p>'; return; }
+    box.innerHTML = product.offers.map(function (o, i) {
+      return '<label class="offer"><input type="radio" name="offer" value="' + o.id + '"' + (i === 0 ? ' checked' : '') + '>' +
+        '<span class="l">' + esc(o.label) + '<small>Accès ' + duration(o.days) + ' · ' + product.max_devices + ' appareil' + (product.max_devices > 1 ? 's' : '') + '</small></span>' +
+        '<span class="p">' + fmt(o.price_cents) + '</span></label>';
+    }).join('');
+  }
+
+  function showDone(r) {
+    $('buy').classList.add('hidden'); $('ordered').classList.add('hidden');
+    $('done').classList.remove('hidden');
+    $('done-name').textContent = r.product.name;
+    $('done-offer').textContent = r.offer_label || r.duration_text;
+    $('done-key').textContent = r.key;
+    $('done-duration').textContent = r.duration_text;
+    $('done-devices').textContent = r.max_devices;
+    $('done-email').textContent = r.email ? (r.email_queued ? 'Une copie a été envoyée à ' + r.email + '. Pensez à vérifier vos spams.' : 'Email : ' + r.email) : 'Notez bien cette clé : elle ne sera pas renvoyée automatiquement.';
+    if (r.product.download_url) { $('download').href = r.product.download_url; $('download').classList.remove('hidden'); }
+    window.scrollTo(0, 0);
+  }
+  function showOrdered(r) {
+    $('buy').classList.add('hidden'); $('ordered').classList.remove('hidden');
+    $('o-ref').textContent = r.ref; $('o-product').textContent = r.product_name + (r.offer_label ? ' · ' + r.offer_label : '');
+    $('o-amount').textContent = fmt(r.amount_cents); $('o-method').textContent = r.method_label;
+    $('o-instr').textContent = r.instructions || 'Le vendeur vous communique les consignes de paiement.';
+    $('o-link').href = r.status_url;
+    $('o-email').textContent = 'Un email récapitulatif vous a été envoyé à ' + email() + ' (vérifiez vos spams). Gardez le lien de suivi.';
+    window.scrollTo(0, 0);
+  }
+
+  $('copy').addEventListener('click', function () {
+    var k = $('done-key').textContent;
+    (navigator.clipboard ? navigator.clipboard.writeText(k) : Promise.reject()).then(function () { $('copy').textContent = 'Clé copiée ✓'; }, function () { prompt('Copiez votre clé :', k); });
+  });
+
+  $('rec-btn').addEventListener('click', async function () {
+    var e = ($('rec-email').value || '').trim();
+    hideMsg($('rec-msg'));
+    if (!validEmail(e)) return showMsg($('rec-msg'), 'Adresse email invalide.');
+    try { var r = await post('/api/recover', { email: e }); showMsg($('rec-msg'), r.message, 'ok'); }
+    catch (err) { showMsg($('rec-msg'), err.message); }
+  });
+
+  // --- Stripe (carte bancaire) ---
+  $('stripe-btn').addEventListener('click', async function () {
+    if (!checkForm()) return;
+    var b = $('stripe-btn'); b.disabled = true; b.textContent = 'Redirection vers le paiement…';
+    try { var r = await post('/api/stripe/create-session', { slug: SLUG, offer_id: selectedOffer(), email: email() }); window.location.href = r.url; }
+    catch (e) { showMsg($('msg'), e.message); b.disabled = false; b.textContent = '💳 Payer par carte bancaire'; }
+  });
+
+  // --- Moyens manuels (virement, Lydia, Wero, espèces…) ---
+  function renderManual() {
+    var list = product.manual_methods || [];
+    if (!list.length) return;
+    $('manual-wrap').classList.remove('hidden');
+    $('manual').innerHTML = list.map(function (m) { return '<button type="button" data-m="' + esc(m.id) + '">' + esc(m.label) + '</button>'; }).join('');
+    Array.prototype.forEach.call($('manual').querySelectorAll('button'), function (b) {
+      b.addEventListener('click', function () {
+        selectedMethod = b.dataset.m;
+        Array.prototype.forEach.call($('manual').querySelectorAll('button'), function (x) { x.classList.toggle('on', x === b); });
+        $('manual-form').classList.remove('hidden');
+        $('order-btn').textContent = 'Commander et payer par ' + b.textContent;
+      });
+    });
+  }
+  $('order-btn').addEventListener('click', async function () {
+    if (!checkForm() || !selectedMethod) return;
+    var b = $('order-btn'); b.disabled = true;
+    try { var r = await post('/api/orders', { slug: SLUG, offer_id: selectedOffer(), email: email(), name: ($('name').value || '').trim(), method: selectedMethod }); showOrdered(r); }
+    catch (e) { showMsg($('msg'), e.message); b.disabled = false; }
+  });
+
+  // --- PayPal ---
+  function loadPayPal() {
+    if (!CLIENT_ID || !product.paypal_ready) return;
+    var s = document.createElement('script');
+    s.src = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(CLIENT_ID) + '&currency=' + encodeURIComponent(CURRENCY) + '&intent=capture&locale=fr_FR';
+    s.onload = renderButtons;
+    s.onerror = function () { showMsg($('msg'), 'Impossible de charger PayPal. Vérifiez votre connexion ou désactivez un bloqueur de publicités.'); };
+    document.head.appendChild(s);
+  }
+  function renderButtons() {
+    if (!window.paypal) return;
+    window.paypal.Buttons({
+      style: { layout: 'vertical', shape: 'rect', label: 'pay' },
+      onClick: function (data, actions) { return checkForm() ? actions.resolve() : actions.reject(); },
+      createOrder: async function () {
+        var r = await post('/api/paypal/create-order', { slug: SLUG, offer_id: selectedOffer(), email: email() });
+        return r.order_id;
+      },
+      onApprove: async function (data) {
+        showMsg($('msg'), 'Paiement en cours de confirmation…', 'ok');
+        try { var r = await post('/api/paypal/capture', { order_id: data.orderID }); showDone(r); }
+        catch (e) { showMsg($('msg'), e.message); }
+      },
+      onCancel: function () { showMsg($('msg'), 'Paiement annulé. Vous n\'avez pas été débité.'); },
+      onError: function (e) { showMsg($('msg'), 'Le paiement a échoué : ' + ((e && e.message) || 'erreur PayPal') + '. Réessayez ou contactez le vendeur.'); }
+    }).render('#paypal-buttons');
+  }
+
+  // --- Retour de Stripe ---
+  var params = new URLSearchParams(location.search);
+  if (params.get('stripe_session')) {
+    $('offers').innerHTML = '<p class="hint">Confirmation de votre paiement…</p>';
+    post('/api/stripe/confirm', { session_id: params.get('stripe_session') }).then(function (r) { history.replaceState(null, '', location.pathname); showDone(r); })
+      .catch(function (e) { showMsg($('msg'), e.message); init(); });
+  } else {
+    if (params.get('cancelled')) showMsg($('msg'), 'Paiement annulé. Vous n\'avez pas été débité.');
+    init();
+  }
+
+  function init() {
+    fetch(ORIGIN + '/api/products/' + encodeURIComponent(SLUG)).then(function (r) { return r.json(); }).then(function (p) {
+      if (p.error) throw new Error(p.error);
+      product = p;
+      $('desc').textContent = p.description || '';
+      renderOffers();
+      if (p.stripe_ready) $('stripe-btn').classList.remove('hidden');
+      loadPayPal();
+      renderManual();
+      var any = p.stripe_ready || (CLIENT_ID && p.paypal_ready) || (p.manual_methods || []).length;
+      $('pp-hint').textContent = any ? (p.stripe_ready || p.paypal_ready ? 'Paiement en ligne sécurisé (carte bancaire, Apple Pay, Google Pay, PayPal). Clé envoyée immédiatement.' : '') : 'Le paiement en ligne n\'est pas encore activé. Contactez le vendeur pour obtenir une clé.';
+    }).catch(function (e) { $('offers').innerHTML = '<p class="hint">' + esc(e.message) + '</p>'; });
+  }
+})();
+</script>
+</body>
+</html>

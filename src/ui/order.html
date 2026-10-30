@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Commande __REF__ – __BRAND__</title>
+<meta name="robots" content="noindex">
+<style>
+  :root { --bg:#f6f7fb; --card:#fff; --text:#0f172a; --muted:#64748b; --line:#e2e8f0; --accent:#2563eb; --ok:#059669; --err:#dc2626; --amber:#d97706; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0b1220; --card:#111a2e; --text:#e5e7eb; --muted:#94a3b8; --line:#1f2a44; } }
+  * { box-sizing:border-box }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--text); line-height:1.45 }
+  .wrap { max-width:520px; margin:0 auto; padding:28px 16px 48px }
+  .brand { color:var(--muted); font-size:13px; margin-bottom:6px }
+  h1 { font-size:24px; margin:0 0 6px } h2 { font-size:16px; margin:0 0 10px }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px; margin-bottom:16px }
+  .kv { display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid var(--line); font-size:15px } .kv:last-child { border-bottom:0 } .kv span:first-child { color:var(--muted) }
+  .status { display:inline-block; padding:4px 10px; border-radius:999px; font-weight:600; font-size:13px }
+  .s-pending { background:rgba(217,119,6,.15); color:var(--amber) } .s-paid { background:rgba(5,150,105,.15); color:var(--ok) } .s-cancelled { background:rgba(220,38,38,.12); color:var(--err) }
+  .ref { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:22px; letter-spacing:1px; background:#0f172a; color:#fff; padding:12px; border-radius:10px; text-align:center; margin:10px 0 }
+  .key { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:18px; background:#0f172a; color:#fff; padding:14px; border-radius:10px; text-align:center; word-break:break-all; margin:10px 0 }
+  .instr { white-space:pre-line; background:var(--bg); border-radius:10px; padding:12px; font-size:15px }
+  .btn { display:block; width:100%; text-align:center; padding:13px; border-radius:10px; font-weight:600; text-decoration:none; border:0; font-size:16px; cursor:pointer; margin-top:10px }
+  .primary { background:var(--accent); color:#fff } .ghost { background:transparent; border:1px solid var(--line); color:var(--text) }
+  .muted { color:var(--muted); font-size:13px } .hidden { display:none }
+  ol { padding-left:20px; color:var(--muted); font-size:14px } li { margin:5px 0 }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">__BRAND__</div>
+  <h1>Ma commande</h1>
+  <div class="card" id="loading">Chargement…</div>
+
+  <div class="card hidden" id="pending">
+    <h2>⏳ En attente de votre paiement</h2>
+    <div class="ref" id="p-ref"></div>
+    <div class="kv"><span>Produit</span><b id="p-product"></b></div>
+    <div class="kv"><span>Montant</span><b id="p-amount"></b></div>
+    <div class="kv"><span>Mode de paiement</span><span id="p-method"></span></div>
+    <h2 style="margin-top:14px">Comment payer</h2>
+    <div class="instr" id="p-instr"></div>
+    <p class="muted" style="margin-top:10px">Indiquez bien la référence <b id="p-ref2"></b> lors du paiement. Dès que le vendeur confirme la réception, cette page affiche votre clé et vous la recevez par email. Vous pouvez fermer cette page et y revenir plus tard (gardez le lien).</p>
+    <button class="btn ghost" id="refresh">Actualiser</button>
+  </div>
+
+  <div class="card hidden" id="paid">
+    <h2>✅ Paiement confirmé, voici votre accès</h2>
+    <div class="kv"><span>Produit</span><b id="d-product"></b></div>
+    <div class="key" id="d-key"></div>
+    <a class="btn primary hidden" id="d-dl" href="#" target="_blank" rel="noopener">Télécharger l'application</a>
+    <h2 style="margin-top:14px">Comment l'activer</h2>
+    <ol><li>Installez et ouvrez l'application.</li><li>Au premier démarrage (ou menu <i>Licence</i>), collez le code ci-dessus et validez.</li><li>C'est tout.</li></ol>
+    <p class="muted">Durée : <span id="d-duration"></span> à partir de l'activation · <span id="d-devices"></span> appareil(s).</p>
+  </div>
+
+  <div class="card hidden" id="cancelled">
+    <h2>Commande annulée</h2>
+    <p class="muted">Cette commande a été annulée. Vous pouvez en passer une nouvelle.</p>
+    <a class="btn primary" id="c-buy" href="#">Retour à la boutique</a>
+  </div>
+  <div class="card hidden" id="error"><b style="color:var(--err)">Commande introuvable</b><p class="muted">Vérifiez le lien reçu par email.</p></div>
+</div>
+<script>
+(function () {
+  var ORIGIN = '__ORIGIN__', REF = '__REF__', TOKEN = '__TOKEN__';
+  var $ = function (i) { return document.getElementById(i); };
+  function fmt(c, cur) { try { return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: cur || 'EUR' }).format(c / 100); } catch (e) { return (c / 100).toFixed(2) + ' ' + cur; } }
+  function dur(d) { if (!d) return 'illimitée'; if (d % 365 === 0) return d / 365 === 1 ? '1 an' : d / 365 + ' ans'; if (d % 30 === 0) return d / 30 + ' mois'; return d + ' jours'; }
+  function show(id) { ['loading', 'pending', 'paid', 'cancelled', 'error'].forEach(function (x) { $(x).classList.toggle('hidden', x !== id); }); }
+  async function load() {
+    try {
+      var res = await fetch(ORIGIN + '/api/orders/' + encodeURIComponent(REF) + '?t=' + encodeURIComponent(TOKEN));
+      var d = await res.json();
+      if (!res.ok) throw new Error(d.error || 'Erreur');
+      if (d.status === 'paid') {
+        $('d-product').textContent = d.product_name + (d.offer_label ? ' · ' + d.offer_label : '');
+        $('d-key').textContent = d.key || '';
+        $('d-duration').textContent = dur(d.duration_days); $('d-devices').textContent = d.max_devices || '';
+        if (d.download_url) { $('d-dl').href = d.download_url; $('d-dl').classList.remove('hidden'); }
+        show('paid'); return true;
+      }
+      if (d.status === 'cancelled') { $('c-buy').href = d.buy_url; show('cancelled'); return true; }
+      $('p-ref').textContent = d.ref; $('p-ref2').textContent = d.ref;
+      $('p-product').textContent = d.product_name + (d.offer_label ? ' · ' + d.offer_label : '');
+      $('p-amount').textContent = fmt(d.amount_cents, d.currency); $('p-method').textContent = d.method_label;
+      $('p-instr').textContent = d.instructions || 'Le vendeur vous communique les consignes de paiement.';
+      show('pending'); return false;
+    } catch (e) { show('error'); return true; }
+  }
+  $('refresh').addEventListener('click', load);
+  load().then(function (done) { if (!done) setInterval(function () { load(); }, 20000); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1087 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mes licences</title>
+<link rel="manifest" href="/admin/manifest.json">
+<meta name="theme-color" content="#0f172a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Licences">
+<link rel="apple-touch-icon" href="/admin/icon-192.png">
+<link rel="icon" href="/admin/icon-192.png">
+<style>
+  :root {
+    --bg:#f3f4f8; --card:#ffffff; --text:#0f172a; --muted:#64748b; --line:#e5e7eb; --soft:#f1f5f9;
+    --accent:#10b981; --accent-ink:#052e16; --blue:#2563eb; --red:#dc2626; --amber:#d97706; --mono:ui-monospace,Menlo,Consolas,monospace;
+    --nav-h:64px; --safe-b:env(safe-area-inset-bottom,0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0b1220; --card:#121b2f; --text:#e5e7eb; --muted:#94a3b8; --line:#1f2a44; --soft:#172138; }
+  }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent }
+  html, body { margin:0; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; font-size:16px; line-height:1.4 }
+  body { padding-bottom:calc(var(--nav-h) + var(--safe-b)) }
+  a { color:var(--blue) }
+  button, input, select, textarea { font:inherit; color:inherit }
+  h1 { font-size:22px; margin:0 } h2 { font-size:17px; margin:18px 0 10px } h3 { font-size:15px; margin:0 0 6px }
+  .muted { color:var(--muted) } .small { font-size:13px } .mono { font-family:var(--mono) } .right { text-align:right }
+  .row { display:flex; align-items:center; gap:10px } .grow { flex:1; min-width:0 } .wrap { flex-wrap:wrap }
+  .ellipsis { overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+
+  #offline { display:none; position:sticky; top:0; z-index:6; background:var(--amber); color:#fff; font-size:13px; font-weight:600; padding:calc(env(safe-area-inset-top,0px) + 8px) 16px 8px; text-align:center }
+  #offline.show { display:block } #offline.sync { background:var(--blue) }
+  header.top { position:sticky; top:0; z-index:5; background:var(--bg); padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 10px; display:flex; align-items:center; gap:10px }
+  body.offline header.top { top:36px; padding-top:12px }
+  header.top .back { width:40px; height:40px; border-radius:12px; border:0; background:var(--card); display:flex; align-items:center; justify-content:center; cursor:pointer; flex:none }
+  header.top .act { height:40px; padding:0 14px; border-radius:12px; border:0; background:var(--accent); color:var(--accent-ink); font-weight:600; cursor:pointer; white-space:nowrap }
+  main { padding:4px 16px 24px; max-width:720px; margin:0 auto }
+
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px 16px; margin-bottom:12px }
+  .card.warn { border-color:var(--amber) }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px }
+  .stat { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px; cursor:pointer }
+  .stat .v { font-size:24px; font-weight:700; margin-top:2px } .stat .l { color:var(--muted); font-size:13px }
+  .stat.accent { background:linear-gradient(135deg,#059669,#10b981); color:#fff; border:0 } .stat.accent .l { color:rgba(255,255,255,.85) }
+  .stat.small .v { font-size:19px }
+
+  .list .item { display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--line); cursor:pointer }
+  .list .item:last-child { border-bottom:0 } .list .item:active { opacity:.7 } .list .item.static { cursor:default }
+  .chev { color:var(--muted); flex:none }
+
+  .badge { display:inline-block; padding:2px 8px; border-radius:999px; font-size:12px; font-weight:600; white-space:nowrap }
+  .b-active { background:rgba(16,185,129,.15); color:#059669 } .b-pending { background:rgba(37,99,235,.15); color:#2563eb }
+  .b-expired { background:rgba(217,119,6,.15); color:#d97706 } .b-revoked { background:rgba(220,38,38,.15); color:#dc2626 }
+  .b-expiring { background:rgba(217,119,6,.15); color:#d97706 } .b-off { background:var(--soft); color:var(--muted) } .b-stock { background:rgba(100,116,139,.18); color:var(--muted) }
+
+  label.f { display:block; font-size:13px; color:var(--muted); margin:12px 0 6px }
+  input[type=text], input[type=email], input[type=password], input[type=number], input[type=url], input[type=date], input[type=tel], select, textarea {
+    width:100%; padding:12px; border:1px solid var(--line); border-radius:12px; background:var(--bg); color:var(--text); font-size:16px }
+  textarea { min-height:80px; resize:vertical }
+  .check { display:flex; align-items:center; gap:10px; padding:10px 0; cursor:pointer } .check input { width:20px; height:20px; accent-color:var(--accent) }
+  .btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 16px; border-radius:12px; border:0; font-weight:600; cursor:pointer; background:var(--soft); color:var(--text); min-height:44px; text-decoration:none }
+  .btn.primary { background:var(--accent); color:var(--accent-ink) } .btn.blue { background:var(--blue); color:#fff }
+  .btn.danger { background:rgba(220,38,38,.12); color:var(--red) } .btn.block { width:100%; margin-top:10px } .btn.sm { padding:8px 12px; min-height:36px; font-size:14px }
+  .btn.big { padding:16px; font-size:17px }
+  .btn:disabled { opacity:.5; cursor:default }
+  .actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px }
+
+  .chips { display:flex; gap:8px; overflow-x:auto; padding:4px 0 10px; scrollbar-width:none } .chips::-webkit-scrollbar { display:none } .chips.wrapc { flex-wrap:wrap; overflow:visible }
+  .chip { flex:none; padding:8px 12px; border-radius:999px; background:var(--card); border:1px solid var(--line); font-size:14px; cursor:pointer; white-space:nowrap; text-decoration:none; color:var(--text) }
+  .chip.on { background:var(--text); color:var(--bg); border-color:var(--text) } .chip.big { padding:12px 16px; font-size:15px }
+
+  .key { font-family:var(--mono); font-size:clamp(13px, 4.2vw, 18px); letter-spacing:.3px; background:#0f172a; color:#fff; padding:14px; border-radius:12px; text-align:center; word-break:break-all }
+  .kv { display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid var(--line); font-size:15px } .kv:last-child { border-bottom:0 } .kv .k { color:var(--muted) }
+  .bar { height:8px; background:var(--soft); border-radius:999px; overflow:hidden } .bar > i { display:block; height:100%; background:var(--accent) }
+  .months { display:flex; align-items:flex-end; gap:6px; height:90px; margin-top:8px } .months .m { flex:1; text-align:center; font-size:10px; color:var(--muted) }
+  .months .m i { display:block; background:var(--accent); border-radius:6px 6px 0 0; margin:0 auto 4px; width:70% }
+  .empty { text-align:center; color:var(--muted); padding:28px 12px }
+  .empty .big { font-size:40px; margin-bottom:8px }
+  .offer-row { display:grid; grid-template-columns:1fr 70px 90px 36px; gap:6px; align-items:center; margin-bottom:8px }
+  .offer-row input, .offer-row select { padding:10px 8px; font-size:15px }
+  .offer-row .x { background:transparent; border:0; color:var(--red); font-size:20px; cursor:pointer; padding:0; height:40px }
+  .dur { display:grid; grid-template-columns:1fr 1fr; gap:8px }
+  .msgbox { white-space:pre-wrap; font-size:14px; background:var(--soft); border-radius:12px; padding:12px; line-height:1.5; word-break:break-word }
+  table.t { width:100%; border-collapse:collapse; font-size:13px } table.t th, table.t td { padding:7px 4px; border-bottom:1px solid var(--line); text-align:right } table.t th:first-child, table.t td:first-child { text-align:left } table.t th { color:var(--muted); font-weight:500 }
+
+  nav.bottom { position:fixed; left:0; right:0; bottom:0; height:calc(var(--nav-h) + var(--safe-b)); padding-bottom:var(--safe-b); background:var(--card); border-top:1px solid var(--line); display:flex; z-index:10 }
+  nav.bottom a { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; text-decoration:none; color:var(--muted); font-size:11px; font-weight:500 }
+  nav.bottom a.on { color:var(--accent) } nav.bottom svg { width:24px; height:24px }
+
+  #toast { position:fixed; left:50%; bottom:calc(var(--nav-h) + var(--safe-b) + 16px); transform:translateX(-50%); background:var(--text); color:var(--bg); padding:12px 18px; border-radius:12px; font-weight:500; opacity:0; transition:opacity .2s; z-index:50; max-width:90vw; text-align:center; pointer-events:none }
+  #toast.show { opacity:1 } #toast.err { background:var(--red); color:#fff }
+
+  .sheet-bg { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:20; display:flex; align-items:flex-end; justify-content:center }
+  .sheet { background:var(--card); width:100%; max-width:720px; border-radius:20px 20px 0 0; padding:18px 16px calc(16px + var(--safe-b)); max-height:92vh; overflow:auto }
+  .sheet h2 { margin-top:0 }
+
+  .login { max-width:400px; margin:10vh auto 0; padding:0 20px; text-align:center }
+  .login img { width:84px; height:84px; border-radius:22px; margin-bottom:14px }
+  .login form { text-align:left; margin-top:20px }
+
+  .spinner { width:28px; height:28px; border:3px solid var(--line); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; margin:40px auto }
+  @keyframes spin { to { transform:rotate(360deg) } }
+  .steps li { margin:6px 0 } .steps { padding-left:20px }
+  code { font-family:var(--mono); font-size:13px; background:var(--soft); padding:2px 6px; border-radius:6px; word-break:break-all }
+  details summary { cursor:pointer; font-weight:600; padding:6px 0 }
+</style>
+</head>
+<body>
+<div id="offline"></div>
+<div id="app"><div class="spinner"></div></div>
+<div id="toast"></div>
+
+<script>
+/* ======================= État & stockage ======================= */
+var STORE = 'licences_admin_servers_v1', CACHE_KEY = 'licences_admin_cache_v1', QUEUE_KEY = 'licences_admin_queue_v1';
+var S = { servers: [], current: 0, deferredInstall: null, licFilter: { q: '', state: '', product: '' }, licPage: 1, offline: false, offlineSince: null, cache: {}, queue: [], syncing: false };
+var $app = document.getElementById('app');
+
+function lsGet(k, d) { try { var v = JSON.parse(localStorage.getItem(k) || 'null'); return v === null ? d : v; } catch (e) { return d; } }
+function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+function loadServers() {
+  var d = lsGet(STORE, null);
+  if (d && Array.isArray(d.servers)) { S.servers = d.servers; S.current = d.current || 0; }
+  if (!S.servers.length) S.servers = [{ name: 'Serveur principal', url: location.origin, token: null }];
+  if (S.current >= S.servers.length) S.current = 0;
+  S.cache = lsGet(CACHE_KEY, {}); S.queue = lsGet(QUEUE_KEY, []);
+}
+function saveServers() { lsSet(STORE, { servers: S.servers, current: S.current }); }
+function saveCache() { var keys = Object.keys(S.cache); if (keys.length > 80) { keys.sort(function (a, b) { return S.cache[a].t - S.cache[b].t; }).slice(0, keys.length - 80).forEach(function (k) { delete S.cache[k]; }); } lsSet(CACHE_KEY, S.cache); }
+function saveQueue() { lsSet(QUEUE_KEY, S.queue); updateOfflineBar(); }
+function srv() { return S.servers[S.current]; }
+function normalizeUrl(u) { u = String(u || '').trim().replace(/\/+$/, ''); if (u && !/^https?:\/\//i.test(u)) u = 'https://' + u; return u; }
+
+/* ======================= Appels API (avec cache hors ligne) ======================= */
+async function api(path, opts, server) {
+  opts = opts || {}; server = server || srv();
+  var method = opts.method || 'GET';
+  var headers = { 'Content-Type': 'application/json' };
+  if (server.token) headers.Authorization = 'Bearer ' + server.token;
+  var cacheKey = server.url + '|' + path;
+  var res;
+  try {
+    res = await fetch(server.url + '/admin/api' + path, { method: method, headers: headers, body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined });
+  } catch (e) {
+    if (method === 'GET' && S.cache[cacheKey]) { setOffline(true, S.cache[cacheKey].t); return S.cache[cacheKey].data; }
+    setOffline(true, null);
+    var er = new Error(method === 'GET' ? 'Hors ligne : aucune donnée enregistrée pour cet écran.' : 'Hors ligne : cette action nécessite une connexion.'); er.offline = true; throw er;
+  }
+  var data = null; try { data = await res.json(); } catch (e) {}
+  if (res.status === 401 && !opts.noAuthRedirect) { server.token = null; saveServers(); setTimeout(route, 0); throw new Error((data && data.error) || 'Session expirée, reconnectez-vous'); }
+  if (!res.ok) throw new Error((data && data.error) || ('Erreur ' + res.status));
+  if (S.offline) { setOffline(false); flushQueue(); }
+  if (method === 'GET' && !opts.noCache) { S.cache[cacheKey] = { t: Date.now(), data: data }; saveCache(); }
+  return data;
+}
+function setOffline(on, since) {
+  S.offline = on; if (on) S.offlineSince = since || S.offlineSince;
+  document.body.classList.toggle('offline', on);
+  updateOfflineBar();
+}
+function updateOfflineBar() {
+  var bar = document.getElementById('offline');
+  var n = S.queue.length;
+  if (S.offline) { bar.className = 'show'; bar.textContent = 'Hors ligne' + (S.offlineSince ? ' · données du ' + fdt(new Date(S.offlineSince).toISOString()) : '') + (n ? ' · ' + plural(n, 'vente') + ' à synchroniser' : ''); }
+  else if (n) { bar.className = 'show sync'; bar.textContent = S.syncing ? 'Synchronisation…' : plural(n, 'vente') + ' en attente de synchronisation'; }
+  else bar.className = '';
+}
+/** Rejoue les actions faites hors ligne (ventes rapides depuis la réserve). */
+async function flushQueue() {
+  if (S.syncing || !S.queue.length) return;
+  S.syncing = true; updateOfflineBar();
+  var remaining = [];
+  for (var i = 0; i < S.queue.length; i++) {
+    var q = S.queue[i];
+    var server = S.servers.find(function (s) { return s.url === q.server; });
+    if (!server || !server.token) { remaining.push(q); continue; }
+    try { await api(q.path, { method: q.method, body: q.body }, server); }
+    catch (e) { if (e.offline) { remaining.push(q); } else if (!/introuvable|404/.test(e.message)) remaining.push(q); }
+  }
+  var done = S.queue.length - remaining.length;
+  S.queue = remaining; S.syncing = false; saveQueue();
+  if (done) { toast(plural(done, 'vente') + ' synchronisée' + (done > 1 ? 's' : '') + ' ✓'); if (!document.getElementById('sheet')) route(); }
+}
+
+/* ======================= Utilitaires ======================= */
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+function eur(c) { try { return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format((c || 0) / 100); } catch (e) { return ((c || 0) / 100).toFixed(2) + ' €'; } }
+function fdate(iso) { if (!iso) return '—'; try { return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' }); } catch (e) { return iso; } }
+function fdt(iso) { if (!iso) return '—'; try { return new Date(iso).toLocaleString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch (e) { return iso; } }
+function fmonth(ym) { try { var d = new Date(ym + '-01T12:00:00Z'); return d.toLocaleDateString('fr-FR', { month: 'short', year: '2-digit' }).replace('.', ''); } catch (e) { return ym; } }
+function fdur(days) { if (!days || days <= 0) return 'à vie'; if (days % 365 === 0) return days / 365 === 1 ? '1 an' : (days / 365) + ' ans'; if (days % 30 === 0) return (days / 30) + ' mois'; if (days % 7 === 0) return days / 7 === 1 ? '1 semaine' : (days / 7) + ' semaines'; return days === 1 ? '1 jour' : days + ' jours'; }
+function cap(s) { return String(s).replace(/^./, function (c) { return c.toUpperCase(); }); }
+function toDays(n, unit) { n = Number(n) || 0; if (unit === 'vie') return 0; if (unit === 'ans') return n * 365; if (unit === 'mois') return n * 30; return n; }
+function fromDays(days) { if (!days) return { n: 1, unit: 'vie' }; if (days % 365 === 0) return { n: days / 365, unit: 'ans' }; if (days % 30 === 0) return { n: days / 30, unit: 'mois' }; return { n: days, unit: 'jours' }; }
+function plural(n, s, p) { return n + ' ' + (n > 1 ? (p || s + 's') : s); }
+function parsePrice(v) { return Math.round(parseFloat(String(v || '0').replace(',', '.').replace(/[^\d.]/g, '')) * 100) || 0; }
+var STATE_LABEL = { active: 'Active', pending: 'En attente', expired: 'Expirée', revoked: 'Désactivée', stock: 'Réserve' };
+function badge(l) {
+  var st = l.state, cls = 'b-' + st, txt = STATE_LABEL[st] || st;
+  if (st === 'active' && l.days_left !== null && l.days_left <= 7) { cls = 'b-expiring'; txt = 'Expire dans ' + plural(l.days_left, 'jour'); }
+  return '<span class="badge ' + cls + '">' + esc(txt) + '</span>';
+}
+function expiryText(l) {
+  if (l.state === 'revoked') return 'Désactivée';
+  if (l.state === 'pending' || l.state === 'stock') return l.lifetime ? 'À vie · pas encore activée' : fdur(l.duration_days) + ' · pas encore activée';
+  if (l.lifetime || !l.expires_at) return 'À vie';
+  if (l.state === 'expired') return 'Expirée le ' + fdate(l.expires_at);
+  return 'Jusqu\'au ' + fdate(l.expires_at) + ' (' + plural(l.days_left, 'jour') + ')';
+}
+var EVENT_LABEL = { sale: 'Vente PayPal', order_created: 'Commande reçue', order_paid: 'Paiement validé', order_cancelled: 'Commande annulée', stripe_error: 'Erreur Stripe', sold: 'Vente rapide', license_created: 'Licence créée', stock_created: 'Clés en réserve', activate: 'Activation', device_added: 'Nouvel appareil', device_removed: 'Appareil retiré', devices_reset: 'Appareils réinitialisés', revoke: 'Désactivation', reactivate: 'Réactivation', refund: 'Remboursement', extend: 'Prolongation', set_expiry: 'Date modifiée', email_sent: 'Email envoyé', email_failed: 'Échec email', paypal_error: 'Erreur PayPal', webhook_error: 'Erreur webhook', webhook_rejected: 'Webhook refusé', webhook_ignored: 'Webhook ignoré', recover_sent: 'Clés renvoyées', recover_failed: 'Échec renvoi clés', settings: 'Réglages modifiés', product_created: 'Application créée', product_update: 'Nouvelle version publiée' };
+var ERROR_EVENTS = ['email_failed', 'paypal_error', 'stripe_error', 'webhook_error', 'webhook_rejected', 'webhook_ignored', 'recover_failed'];
+var PAY_LABELS = { cash: 'Espèces', virement: 'Virement', lydia: 'Lydia', wero: 'Wero', paypalme: 'PayPal', paypal: 'PayPal', stripe: 'Carte (Stripe)', revolut: 'Revolut', autre: 'Autre', '': 'Non précisé' };
+function payLabel(m) { return PAY_LABELS[m] || m || 'Non précisé'; }
+var QUICK_METHODS = [['cash', 'Espèces'], ['virement', 'Virement'], ['lydia', 'Lydia'], ['wero', 'Wero'], ['paypalme', 'PayPal'], ['revolut', 'Revolut'], ['autre', 'Autre']];
+
+var toastTimer;
+function toast(msg, isErr) { var t = document.getElementById('toast'); t.textContent = msg; t.className = 'show' + (isErr ? ' err' : ''); clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.className = ''; }, isErr ? 4500 : 2500); }
+async function copy(text, label) {
+  try { await navigator.clipboard.writeText(text); toast((label || 'Copié') + ' ✓'); }
+  catch (e) { prompt('Copiez :', text); }
+}
+async function share(title, text, url) {
+  if (navigator.share) { try { await navigator.share(url ? { title: title, text: text, url: url } : { title: title, text: text }); return; } catch (e) { if (e && e.name === 'AbortError') return; } }
+  copy(url ? text + ' ' + url : text, 'Copié (partage non disponible ici)');
+}
+function sheet(html) {
+  closeSheet();
+  var bg = document.createElement('div'); bg.className = 'sheet-bg'; bg.id = 'sheet';
+  bg.innerHTML = '<div class="sheet">' + html + '</div>';
+  bg.addEventListener('click', function (e) { if (e.target === bg) closeSheet(); });
+  document.body.appendChild(bg);
+  return bg;
+}
+function closeSheet() { var s = document.getElementById('sheet'); if (s) s.remove(); }
+function confirmSheet(title, text, okLabel, danger) {
+  return new Promise(function (resolve) {
+    sheet('<h2>' + esc(title) + '</h2><p class="muted">' + esc(text) + '</p><div class="actions"><button class="btn grow" id="c-no">Annuler</button><button class="btn grow ' + (danger ? 'danger' : 'primary') + '" id="c-ok">' + esc(okLabel || 'Confirmer') + '</button></div>');
+    document.getElementById('c-no').onclick = function () { closeSheet(); resolve(false); };
+    document.getElementById('c-ok').onclick = function () { closeSheet(); resolve(true); };
+  });
+}
+function promptSheet(title, label, value, type, okLabel) {
+  return new Promise(function (resolve) {
+    sheet('<h2>' + esc(title) + '</h2><label class="f">' + esc(label) + '</label><input id="p-in" type="' + (type || 'text') + '" value="' + esc(value || '') + '"><div class="actions"><button class="btn grow" id="p-no">Annuler</button><button class="btn grow primary" id="p-ok">' + esc(okLabel || 'Valider') + '</button></div>');
+    var inp = document.getElementById('p-in'); setTimeout(function () { inp.focus(); }, 50);
+    document.getElementById('p-no').onclick = function () { closeSheet(); resolve(null); };
+    document.getElementById('p-ok').onclick = function () { var v = inp.value; closeSheet(); resolve(v); };
+    inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') document.getElementById('p-ok').click(); });
+  });
+}
+/** Message prêt à envoyer au client (SMS, WhatsApp, email). */
+function clientMessage(l, downloadUrl) {
+  return 'Votre accès à ' + l.product_name + '\n' +
+    'Code : ' + l.key + '\n' +
+    'Durée : ' + (l.lifetime || !l.duration_days ? 'illimitée' : fdur(l.duration_days) + ' à partir de l\'activation') + ' · ' + plural(l.max_devices, 'appareil') + '\n' +
+    (downloadUrl ? '1) Téléchargez l\'application : ' + downloadUrl + '\n2) Ouvrez-la et collez le code.\n' : '1) Installez l\'application.\n2) Ouvrez-la et collez le code.\n') +
+    'Retrouver mon accès : ' + srv().url + '/go';
+}
+
+/* ======================= Icônes ======================= */
+var I = {
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4v-7H9v7H5a2 2 0 0 1-2-2z"/></svg>',
+  apps: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+  key: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="15" r="4"/><path d="M10.9 12.1L21 2M15 8l3 3M18 5l3 3"/></svg>',
+  users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  more: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
+  back: '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
+  chev: '<svg class="chev" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>'
+};
+
+/* ======================= Rendu ======================= */
+function render(h) { $app.innerHTML = h; window.scrollTo(0, 0); }
+function nav(active) {
+  var items = [['/', 'Accueil', I.home], ['/apps', 'Apps', I.apps], ['/licences', 'Licences', I.key], ['/clients', 'Clients', I.users], ['/plus', 'Plus', I.more]];
+  return '<nav class="bottom">' + items.map(function (it) { return '<a href="#' + it[0] + '" class="' + (active === it[0] ? 'on' : '') + '">' + it[2] + '<span>' + it[1] + '</span></a>'; }).join('') + '</nav>';
+}
+function page(opts, content) {
+  var h = '<header class="top">';
+  if (opts.back) h += '<button class="back" data-act="back" aria-label="Retour">' + I.back + '</button>';
+  h += '<h1 class="grow ellipsis">' + esc(opts.title) + '</h1>';
+  if (opts.action) h += '<button class="act" data-act="' + opts.action.act + '"' + (opts.action.to ? ' data-to="' + esc(opts.action.to) + '"' : '') + '>' + esc(opts.action.label) + '</button>';
+  h += '</header><main>' + content + '</main>' + nav(opts.nav || '');
+  return h;
+}
+function loading(opts) { render(page(opts, '<div class="spinner"></div>')); }
+function errorBox(e) { return '<div class="card"><b style="color:var(--red)">' + (e.offline ? 'Hors ligne' : 'Erreur') + '</b><div class="muted small">' + esc(e.message || e) + '</div><button class="btn block" data-act="reload">Réessayer</button></div>'; }
+function empty(icon, title, text, btn) { return '<div class="empty"><div class="big">' + icon + '</div><b>' + esc(title) + '</b><div class="small">' + esc(text || '') + '</div>' + (btn || '') + '</div>'; }
+
+/* ======================= Routeur ======================= */
+function route() {
+  var hash = location.hash.slice(1) || '/';
+  var parts = hash.split('?')[0].split('/').filter(Boolean);
+  if (!srv().token) return viewLogin();
+  var v = parts[0] || '', id = parts[1];
+  if (!v) return viewHome();
+  if (v === 'apps') return id === 'new' ? viewAppForm(null) : id ? viewAppForm(Number(id)) : viewApps();
+  if (v === 'licences') return id === 'new' ? viewNewLicence(parts[2] ? { customer: Number(parts[2]) } : null) : id ? viewLicence(Number(id)) : viewLicences();
+  if (v === 'clients') return id ? viewClient(Number(id)) : viewClients();
+  if (v === 'plus') return viewMore();
+  if (v === 'serveurs') return viewServers();
+  if (v === 'reglages') return viewSettings();
+  if (v === 'journal') return viewJournal();
+  if (v === 'guide') return viewGuide();
+  if (v === 'finances') return viewFinances();
+  if (v === 'reserve') return viewStock();
+  if (v === 'commandes') return viewOrders();
+  location.hash = '#/';
+}
+window.addEventListener('hashchange', route);
+function go(h) { location.hash = '#' + h; }
+
+/* ======================= Connexion ======================= */
+function viewLogin() {
+  var s = srv();
+  if (s.url === location.origin) {
+    fetch(s.url + '/admin/api/status').then(function (r) { return r.json(); }).then(function (st) { if (st && st.needs_setup && !document.getElementById('setup')) viewFirstRun(s); }).catch(function () {});
+  }
+  render('<div class="login"><img src="/admin/icon-192.png" alt=""><h1>Mes licences</h1><p class="muted">Connectez-vous à votre serveur de licences</p>' +
+    '<form id="login"><label class="f">Adresse du serveur</label><input type="url" name="url" value="' + esc(s.url) + '" required>' +
+    '<label class="f">Mot de passe administrateur</label><input type="password" name="password" required autocomplete="current-password">' +
+    '<button class="btn primary block" type="submit">Se connecter</button></form>' +
+    '<p class="muted small" style="margin-top:16px">Le mot de passe est celui choisi lors de l\'installation (commande <code>npm run setup</code>), ou modifié depuis Réglages.</p>' +
+    (S.servers.length > 1 ? '<p class="small"><a href="#" data-act="pick-server">Changer de serveur</a></p>' : '') + '</div>');
+  document.getElementById('login').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var f = new FormData(e.target), url = normalizeUrl(f.get('url')), btn = e.target.querySelector('button'); btn.disabled = true;
+    try {
+      var r = await api('/login', { method: 'POST', body: { password: f.get('password') }, noAuthRedirect: true }, { url: url, token: null });
+      s.url = url; s.token = r.token; saveServers(); toast('Connecté ✓'); go('/');
+    } catch (err) { toast(err.message, true); btn.disabled = false; }
+  });
+}
+
+/** Premier lancement : aucun mot de passe n'existe, on le crée ici. */
+function viewFirstRun(s) {
+  render('<div class="login"><img src="/admin/icon-192.png" alt=""><h1>Bienvenue 👋</h1><p class="muted">Votre serveur est en ligne. Choisissez le mot de passe de cette application : vous le taperez pour vous connecter.</p>' +
+    '<form id="setup"><label class="f">Mot de passe administrateur (8 caractères minimum)</label><input type="password" name="password" required minlength="8" autocomplete="new-password">' +
+    '<label class="f">Confirmer</label><input type="password" name="confirm" required autocomplete="new-password">' +
+    '<button class="btn primary block" type="submit">Créer mon mot de passe et commencer</button></form>' +
+    '<p class="muted small" style="margin-top:16px">Notez-le bien. Vous pourrez le changer ensuite dans Réglages.</p></div>');
+  document.getElementById('setup').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var f = new FormData(e.target), btn = e.target.querySelector('button');
+    if (f.get('password') !== f.get('confirm')) return toast('Les deux mots de passe ne correspondent pas', true);
+    btn.disabled = true;
+    try {
+      var r = await api('/setup', { method: 'POST', body: { password: f.get('password') }, noAuthRedirect: true }, { url: s.url, token: null });
+      s.token = r.token; saveServers(); toast('Bienvenue ✓'); go('/'); route();
+    } catch (err) { toast(err.message, true); btn.disabled = false; }
+  });
+}
+
+/* ======================= Accueil ======================= */
+async function viewHome() {
+  var opts = { title: srv().name || 'Accueil', nav: '/' };
+  loading(opts);
+  try {
+    var d = await api('/stats');
+    var maxRev = Math.max.apply(null, d.months.map(function (m) { return m.revenue; }).concat([1]));
+    var months = buildMonths(d.months);
+    var h = '<button class="btn primary big block" style="margin:0 0 12px" data-act="quick-sale">⚡ Vente rapide</button>';
+    h += '<div class="grid2">' +
+      '<div class="stat accent" data-act="go" data-to="/finances"><div class="l">Ce mois-ci</div><div class="v">' + eur(d.revenue_month) + '</div><div class="l">' + plural(d.sales_month, 'vente') + ' · total ' + eur(d.revenue_total) + '</div></div>' +
+      '<div class="stat" data-act="go" data-to="/licences?state=active"><div class="l">Licences actives</div><div class="v">' + d.active + '</div><div class="l">' + plural(d.customers, 'client') + '</div></div>' +
+      '<div class="stat" data-act="go" data-to="/licences?state=expiring"><div class="l">Expirent sous 7 j</div><div class="v" style="color:var(--amber)">' + d.expiring_7d + '</div><div class="l">' + plural(d.expired, 'expirée') + ' au total</div></div>' +
+      '<div class="stat" data-act="go" data-to="/licences?state=pending"><div class="l">En attente d\'activation</div><div class="v" style="color:var(--blue)">' + d.pending + '</div><div class="l">' + plural(d.stock || 0, 'clé') + ' en réserve</div></div></div>';
+    if (d.orders_pending) h += '<div class="card" style="border-color:var(--blue);cursor:pointer" data-act="go" data-to="/commandes"><div class="row"><div class="grow"><b>💶 ' + plural(d.orders_pending, 'paiement') + ' à valider</b><div class="muted small">Des clients ont commandé par virement, Lydia, Wero… Vérifiez l\'argent reçu puis appuyez sur « Payé » : la clé part toute seule.</div></div>' + I.chev + '</div></div>';
+    if (d.errors_7d) h += '<div class="card warn" data-act="go" data-to="/journal?errors=1" style="cursor:pointer"><b>⚠️ ' + plural(d.errors_7d, 'erreur') + ' ces 7 derniers jours</b><div class="muted small">Emails non envoyés ou problèmes PayPal/Stripe : appuyez pour voir le détail.</div></div>';
+    h += '<div class="actions"><button class="btn grow" data-act="go" data-to="/licences/new">+ Licence détaillée</button><button class="btn grow" data-act="go" data-to="/apps">Pages de vente</button></div>';
+    if (d.months.length) {
+      h += '<div class="card"><h3>Ventes des 6 derniers mois</h3><div class="months">' + months.map(function (m) {
+        return '<div class="m"><i style="height:' + Math.max(4, Math.round(70 * m.revenue / maxRev)) + 'px" title="' + eur(m.revenue) + '"></i>' + m.label + '</div>';
+      }).join('') + '</div><button class="btn sm block" data-act="go" data-to="/finances">Voir les finances</button></div>';
+    }
+    if (d.by_product.length) {
+      h += '<div class="card"><h3>Par application</h3><div class="list">' + d.by_product.map(function (p) {
+        return '<div class="item" data-act="go" data-to="/licences?product=' + p.id + '"><div class="grow"><b>' + esc(p.name) + '</b><div class="muted small">' + plural(p.licenses, 'licence') + ' · ' + plural(p.active, 'active') + '</div></div><b>' + eur(p.revenue) + '</b>' + I.chev + '</div>';
+      }).join('') + '</div></div>';
+    } else {
+      h += '<div class="card">' + empty('🚀', 'Commencez ici', 'Créez votre première application, puis partagez sa page de vente ou faites une vente rapide.', '<button class="btn primary" style="margin-top:12px" data-act="go" data-to="/apps/new">Créer une application</button>') + '</div>';
+    }
+    h += '<div class="card"><h3>Activité récente</h3>' + (d.events.length ? '<div class="list">' + d.events.map(eventRow).join('') + '</div>' : '<div class="muted small">Aucune activité pour le moment.</div>') + '<button class="btn sm block" data-act="go" data-to="/journal">Voir tout le journal</button></div>';
+    h += '<p class="muted small right">' + plural(d.requests_today, 'requête') + ' aujourd\'hui · ' + d.requests_7d + ' sur 7 jours</p>';
+    render(page(opts, h));
+  } catch (e) { render(page(opts, errorBox(e))); }
+}
+function buildMonths(rows) {
+  var out = [], now = new Date();
+  for (var i = 5; i >= 0; i--) {
+    var dt = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1));
+    var key = dt.toISOString().slice(0, 7);
+    var found = rows.find(function (r) { return r.month === key; });
+    out.push({ label: dt.toLocaleDateString('fr-FR', { month: 'short' }).replace('.', ''), revenue: found ? found.revenue : 0 });
+  }
+  return out;
+}
+function eventRow(ev) {
+  var to = ev.license_id ? '/licences/' + ev.license_id : null;
+  var isErr = ERROR_EVENTS.indexOf(ev.type) >= 0;
+  return '<div class="item' + (to ? '' : ' static') + '" ' + (to ? 'data-act="go" data-to="' + to + '"' : '') + '><div class="grow"><b' + (isErr ? ' style="color:var(--red)"' : '') + '>' + esc(EVENT_LABEL[ev.type] || ev.type) + '</b>' +
+    (ev.product_name ? ' <span class="muted">· ' + esc(ev.product_name) + '</span>' : '') +
+    '<div class="muted small ellipsis">' + esc(ev.detail || '') + (ev.license_key ? ' · <span class="mono">' + esc(ev.license_key) + '</span>' : '') + '</div></div><span class="muted small">' + fdt(ev.created_at) + '</span></div>';
+}
+
+/* ======================= Vente rapide ======================= */
+async function quickSale(presetProductId) {
+  var products, stock;
+  try { products = (await api('/products')).products.filter(function (p) { return p.active; }); } catch (e) { return toast(e.message, true); }
+  try { stock = (await api('/stock')).stock; } catch (e) { stock = []; }
+  if (!products.length) return sheet('<h2>Aucune application</h2><p class="muted">Créez d\'abord une application (onglet Apps).</p><button class="btn primary block" data-act="close-go" data-to="/apps/new">Créer une application</button>');
+  var state = { product: products.find(function (p) { return p.id === presetProductId; }) || products[0], days: null, price: null, custom: false, method: 'cash' };
+  function offersOf(p) { return (p.offers || []).filter(function (o) { return o.active; }); }
+  function stockFor(pid, days) { return stock.filter(function (s) { return s.product_id === pid && s.duration_days === days; }); }
+  function draw() {
+    var p = state.product, offers = offersOf(p);
+    if (state.days === null && offers.length) { state.days = offers[0].days; state.price = offers[0].price_cents; }
+    if (!offers.length) state.custom = true;
+    var h = '<h2>⚡ Vente rapide</h2>';
+    if (products.length > 1) h += '<div class="chips wrapc">' + products.map(function (x) { return '<span class="chip big ' + (x.id === p.id ? 'on' : '') + '" data-qs="product" data-id="' + x.id + '">' + esc(x.name) + '</span>'; }).join('') + '</div>';
+    else h += '<p class="muted" style="margin:0 0 8px">' + esc(p.name) + '</p>';
+    h += '<label class="f">Durée et prix</label><div class="chips wrapc">' + offers.map(function (o) {
+      var st = S.offline ? stockFor(p.id, o.days).length : null;
+      return '<span class="chip big ' + (!state.custom && state.days === o.days ? 'on' : '') + '" data-qs="offer" data-days="' + o.days + '" data-price="' + o.price_cents + '">' + esc(o.label) + ' · ' + eur(o.price_cents) + (st !== null ? ' <small>(' + st + ' en réserve)</small>' : '') + '</span>';
+    }).join('') + '<span class="chip big ' + (state.custom ? 'on' : '') + '" data-qs="custom">Autre…</span></div>';
+    if (state.custom) h += '<div class="dur"><input type="number" id="qs-n" min="1" value="1"><select id="qs-unit"><option value="jours">jours</option><option value="mois">mois</option><option value="ans" selected>ans</option><option value="vie">à vie</option></select></div>';
+    h += '<label class="f">Prix encaissé (€)</label><input type="number" id="qs-price" step="0.01" min="0" value="' + (state.price !== null ? (state.price / 100).toFixed(2) : '') + '" placeholder="0,00">' +
+      '<label class="f">Payé par</label><div class="chips wrapc">' + QUICK_METHODS.map(function (m) { return '<span class="chip ' + (state.method === m[0] ? 'on' : '') + '" data-qs="method" data-id="' + m[0] + '">' + m[1] + '</span>'; }).join('') + '</div>' +
+      '<label class="f">Email du client (facultatif, pour lui envoyer la clé et le retrouver)</label><input type="email" id="qs-email" placeholder="client@exemple.fr">' +
+      (S.offline ? '<p class="small" style="color:var(--amber)">Hors ligne : la clé sera prise dans votre réserve et la vente synchronisée dès le retour du réseau.</p>' : '') +
+      '<button class="btn primary big block" id="qs-go">Générer la clé</button>';
+    var box = document.querySelector('#sheet .sheet'); if (box) box.innerHTML = h; else sheet(h);
+    document.querySelectorAll('[data-qs]').forEach(function (el) {
+      el.onclick = function () {
+        var k = el.dataset.qs;
+        if (k === 'product') { state.product = products.find(function (x) { return x.id === Number(el.dataset.id); }); state.days = null; state.custom = false; }
+        else if (k === 'offer') { state.days = Number(el.dataset.days); state.price = Number(el.dataset.price); state.custom = false; }
+        else if (k === 'custom') { state.custom = true; state.price = parsePrice(document.getElementById('qs-price').value) || null; }
+        else if (k === 'method') { state.method = el.dataset.id; state.price = parsePrice(document.getElementById('qs-price').value) || null; }
+        draw();
+      };
+    });
+    document.getElementById('qs-go').onclick = submit;
+  }
+  async function submit() {
+    var p = state.product, days = state.custom ? toDays(document.getElementById('qs-n').value, document.getElementById('qs-unit').value) : state.days;
+    if (days === null || isNaN(days)) return toast('Choisissez une durée', true);
+    var price = parsePrice(document.getElementById('qs-price').value), email = document.getElementById('qs-email').value.trim();
+    var btn = document.getElementById('qs-go'); btn.disabled = true; btn.textContent = 'Création…';
+    var lic = null;
+    if (!S.offline) {
+      try {
+        var r = await api('/licenses', { method: 'POST', body: { product_id: p.id, days: days, price_cents: price, email: email || undefined, send_email: !!email, note: 'Vente rapide', offer_label: cap(fdur(days)), payment_method: state.method } });
+        lic = r.license; lic._emailSent = r.email_sent;
+      } catch (e) { if (!e.offline) { toast(e.message, true); btn.disabled = false; btn.textContent = 'Générer la clé'; return; } }
+    }
+    if (!lic) {
+      var avail = stockFor(p.id, days);
+      if (!avail.length) { toast('Pas de clé en réserve pour « ' + p.name + ' · ' + fdur(days) + ' ». Préparez des clés (Plus → Réserve) quand vous avez du réseau.', true); btn.disabled = false; btn.textContent = 'Générer la clé'; return; }
+      var s0 = avail[0];
+      lic = { id: s0.id, key: s0.key, product_name: s0.product_name, duration_days: s0.duration_days, lifetime: s0.duration_days === 0, max_devices: s0.max_devices, price_cents: price, customer_email: email, _offline: true };
+      S.queue.push({ server: srv().url, path: '/licenses/' + s0.id + '/mark_sold', method: 'POST', body: { price_cents: price, email: email || undefined, send_email: !!email, note: 'Vente rapide (hors ligne)', sold_at: new Date().toISOString(), payment_method: state.method }, at: Date.now() });
+      saveQueue();
+      stock = stock.filter(function (s) { return s.id !== s0.id; });
+      var ck = srv().url + '|/stock'; if (S.cache[ck]) { S.cache[ck].data = { stock: stock }; saveCache(); }
+    }
+    showSaleResult(lic, p.download_url);
+  }
+  draw();
+}
+function showSaleResult(l, downloadUrl) {
+  var msg = clientMessage(l, downloadUrl);
+  var h = '<h2>✅ Clé prête</h2><div class="key">' + esc(l.key) + '</div>' +
+    '<p class="muted small" style="text-align:center;margin:8px 0">' + esc(l.product_name) + ' · ' + esc(fdur(l.duration_days)) + ' · ' + plural(l.max_devices, 'appareil') + (l.price_cents ? ' · ' + eur(l.price_cents) : '') + '</p>' +
+    (l._offline ? '<p class="small" style="color:var(--amber);text-align:center">Vente enregistrée hors ligne : elle sera synchronisée automatiquement.</p>' : '') +
+    (l._emailSent === true ? '<p class="small" style="color:var(--accent);text-align:center">Email envoyé à ' + esc(l.customer_email) + ' ✓</p>' : l._emailSent ? '<p class="small" style="color:var(--red);text-align:center">Email non envoyé : ' + esc(l._emailSent) + '</p>' : '') +
+    (!downloadUrl ? '<p class="small" style="color:var(--amber)">Astuce : ajoutez un lien de téléchargement dans Apps → Modifier pour qu\'il soit inclus dans le message.</p>' : '') +
+    '<div class="msgbox">' + esc(msg) + '</div>' +
+    '<div class="actions"><button class="btn grow blue big" data-act="share-text" data-text="' + esc(msg) + '" data-title="Accès ' + esc(l.product_name) + '">📤 Envoyer au client (SMS, WhatsApp…)</button></div>' +
+    '<div class="actions"><button class="btn grow" data-act="copy" data-text="' + esc(msg) + '">Copier le message</button><button class="btn grow" data-act="copy" data-text="' + esc(l.key) + '">Copier la clé</button></div>' +
+    '<div class="actions"><button class="btn grow" data-act="close-go" data-to="/licences/' + l.id + '">Voir la licence</button><button class="btn grow primary" data-act="close">Terminer</button></div>';
+  sheet(h);
+}
+
+/* ======================= Applications ======================= */
+async function viewApps() {
+  var opts = { title: 'Applications', nav: '/apps', action: { label: '+ Ajouter', act: 'go', to: '/apps/new' } };
+  loading(opts);
+  try {
+    var d = await api('/products');
+    var h = d.products.length ? d.products.map(function (p) {
+      var link = srv().url + '/buy/' + p.slug;
+      return '<div class="card"><div class="row"><div class="grow"><b>' + esc(p.name) + '</b> ' + (p.active ? '' : '<span class="badge b-off">désactivée</span>') + (p.version ? ' <span class="badge b-off">v' + esc(p.version) + '</span>' : '') +
+        '<div class="muted small">' + (p.offers.filter(function (o) { return o.active; }).map(function (o) { return esc(o.label) + ' ' + eur(o.price_cents); }).join(' · ') || 'Aucune offre') + '</div>' +
+        '<div class="muted small">' + plural(p.licenses_count, 'licence') + ' · ' + eur(p.revenue) + ' · ' + plural(p.max_devices, 'appareil') + (p.stock_count ? ' · ' + plural(p.stock_count, 'clé') + ' en réserve' : '') + '</div></div></div>' +
+        '<div class="actions"><button class="btn sm primary" data-act="quick-sale" data-id="' + p.id + '">⚡ Vente</button><button class="btn sm" data-act="go" data-to="/apps/' + p.id + '">Modifier</button>' +
+        '<button class="btn sm blue" data-act="share-link" data-link="' + esc(link) + '" data-name="' + esc(p.name) + '">Partager la page de vente</button></div>' +
+        '<div class="muted small mono" style="margin-top:8px;word-break:break-all">' + esc(link) + '</div></div>';
+    }).join('') : '<div class="card">' + empty('📦', 'Aucune application', 'Ajoutez votre première application (par exemple Youpub) pour commencer à vendre.', '<button class="btn primary" style="margin-top:12px" data-act="go" data-to="/apps/new">Créer une application</button>') + '</div>';
+    render(page(opts, h));
+  } catch (e) { render(page(opts, errorBox(e))); }
+}
+
+function offerRowHtml(o) {
+  var d = fromDays(o ? o.days : 365);
+  return '<div class="offer-row" data-id="' + (o && o.id ? o.id : '') + '">' +
+    '<input type="text" class="o-label" placeholder="Libellé (ex : 1 an)" value="' + esc(o ? o.label : '') + '">' +
+    '<input type="number" class="o-n" min="1" value="' + d.n + '"' + (d.unit === 'vie' ? ' style="visibility:hidden"' : '') + '>' +
+    '<select class="o-unit"><option value="jours"' + (d.unit === 'jours' ? ' selected' : '') + '>jours</option><option value="mois"' + (d.unit === 'mois' ? ' selected' : '') + '>mois</option><option value="ans"' + (d.unit === 'ans' ? ' selected' : '') + '>ans</option><option value="vie"' + (d.unit === 'vie' ? ' selected' : '') + '>à vie</option></select>' +
+    '<button type="button" class="x" data-act="rm-offer" aria-label="Supprimer">×</button>' +
+    '<input type="number" class="o-price" step="0.01" min="0" placeholder="Prix €" value="' + (o ? (o.price_cents / 100).toFixed(2) : '') + '" style="grid-column:1 / span 4">' +
+    '</div>';
+}
+async function viewAppForm(id) {
+  var opts = { title: id ? 'Modifier l\'application' : 'Nouvelle application', back: true, nav: '/apps' };
+  loading(opts);
+  var p = { name: '', slug: '', description: '', download_url: '', version: '', changelog: '', max_devices: 2, active: 1, offers: [] };
+  try {
+    if (id) p = (await api('/products/' + id)).product;
+  } catch (e) { return render(page(opts, errorBox(e))); }
+  var offers = id ? p.offers.filter(function (o) { return o.active; }) : [{ label: '1 an', days: 365, price_cents: 2999 }];
+  var h = '<form id="pf"><div class="card">' +
+    '<label class="f">Nom de l\'application *</label><input type="text" name="name" value="' + esc(p.name) + '" required placeholder="Youpub">' +
+    '<label class="f">Identifiant dans le lien de vente</label><input type="text" name="slug" value="' + esc(p.slug) + '" placeholder="youpub" pattern="[a-z0-9\\-]+" title="minuscules, chiffres et tirets">' +
+    '<div class="muted small" style="margin-top:4px">Lien : <span class="mono" id="slug-preview">' + esc(srv().url + '/buy/' + (p.slug || '…')) + '</span></div>' +
+    '<label class="f">Description (affichée sur la page de vente)</label><textarea name="description" placeholder="Regardez vos vidéos sans distraction…">' + esc(p.description) + '</textarea>' +
+    '<label class="f">Appareils autorisés par licence</label><input type="number" name="max_devices" min="1" max="100" value="' + p.max_devices + '">' +
+    '<label class="check"><input type="checkbox" name="active"' + (p.active ? ' checked' : '') + '> Application en vente (page de vente active)</label>' +
+    '</div><div class="card"><h3>Téléchargement et mises à jour</h3><p class="muted small">Le lien est envoyé au client après paiement. Quand vous publiez une nouvelle version, changez le numéro : les clients voient « Nouvelle version disponible » dans l\'application.</p>' +
+    '<label class="f">Lien de téléchargement</label><input type="url" name="download_url" value="' + esc(p.download_url) + '" placeholder="https://…">' +
+    '<label class="f">Version actuelle (ex : 1.2.0)</label><input type="text" name="version" value="' + esc(p.version || '') + '" placeholder="1.0.0">' +
+    '<label class="f">Nouveautés de cette version (facultatif)</label><textarea name="changelog" placeholder="- Lecture plus rapide&#10;- Correction du plein écran">' + esc(p.changelog || '') + '</textarea>' +
+    '</div><div class="card"><h3>Formules et prix</h3><p class="muted small">Chaque formule = une durée et un prix. Le compte à rebours démarre à la première activation par le client. Ces formules servent aussi de raccourcis dans « Vente rapide ».</p>' +
+    '<div id="offers">' + offers.map(offerRowHtml).join('') + '</div>' +
+    '<button type="button" class="btn sm" data-act="add-offer">+ Ajouter une formule</button></div>' +
+    '<button class="btn primary block" type="submit">Enregistrer</button></form>';
+  if (id) h += '<button class="btn danger block" data-act="del-product" data-id="' + id + '">Supprimer l\'application</button><p class="muted small">La suppression n\'est possible que si aucune licence n\'existe. Sinon, décochez « en vente ».</p>';
+  render(page(opts, h));
+  var form = document.getElementById('pf');
+  var nameIn = form.querySelector('[name=name]'), slugIn = form.querySelector('[name=slug]');
+  function slugify(s) { return String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40); }
+  nameIn.addEventListener('input', function () { if (!id && !slugIn.dataset.touched) { slugIn.value = slugify(nameIn.value); updPreview(); } });
+  slugIn.addEventListener('input', function () { slugIn.dataset.touched = '1'; updPreview(); });
+  function updPreview() { document.getElementById('slug-preview').textContent = srv().url + '/buy/' + (slugIn.value || '…'); }
+  form.addEventListener('change', function (e) { if (e.target.classList.contains('o-unit')) { var n = e.target.parentElement.querySelector('.o-n'); n.style.visibility = e.target.value === 'vie' ? 'hidden' : 'visible'; } });
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var f = new FormData(form);
+    var offersOut = Array.from(document.querySelectorAll('.offer-row')).map(function (r) {
+      return { id: r.dataset.id ? Number(r.dataset.id) : undefined, label: r.querySelector('.o-label').value.trim(), days: toDays(r.querySelector('.o-n').value, r.querySelector('.o-unit').value), price_cents: parsePrice(r.querySelector('.o-price').value) };
+    }).filter(function (o) { return o.label; });
+    var body = { name: f.get('name'), slug: f.get('slug'), description: f.get('description'), download_url: f.get('download_url'), version: f.get('version'), changelog: f.get('changelog'), max_devices: Number(f.get('max_devices')), active: !!f.get('active'), offers: offersOut };
+    var btn = form.querySelector('[type=submit]'); btn.disabled = true;
+    try {
+      var r = await api(id ? '/products/' + id : '/products', { method: id ? 'PUT' : 'POST', body: body });
+      toast('Application enregistrée ✓');
+      if (!id) {
+        var link = srv().url + '/buy/' + r.product.slug;
+        sheet('<h2>🎉 ' + esc(r.product.name) + ' est prête</h2><p class="muted">Partagez ce lien : vos clients paient et reçoivent leur clé automatiquement. Ou utilisez « Vente rapide » quand vous êtes avec la personne.</p><div class="key" style="font-size:14px">' + esc(link) + '</div><div class="actions"><button class="btn grow" data-act="copy" data-text="' + esc(link) + '">Copier</button><button class="btn grow blue" data-act="share-link" data-link="' + esc(link) + '" data-name="' + esc(r.product.name) + '">Partager</button></div><button class="btn primary block" data-act="close-go" data-to="/apps">Terminer</button>');
+      } else go('/apps');
+    } catch (err) { toast(err.message, true); btn.disabled = false; }
+  });
+}
+
+/* ======================= Licences ======================= */
+function parseQuery() { var q = location.hash.split('?')[1] || ''; var o = {}; q.split('&').forEach(function (kv) { if (!kv) return; var p = kv.split('='); o[decodeURIComponent(p[0])] = decodeURIComponent(p[1] || ''); }); return o; }
+async function viewLicences() {
+  var qs = parseQuery();
+  if (qs.state !== undefined || qs.product !== undefined) { S.licFilter.state = qs.state || ''; S.licFilter.product = qs.product || ''; S.licPage = 1; }
+  var opts = { title: 'Licences', nav: '/licences', action: { label: '⚡ Vente', act: 'quick-sale' } };
+  var f = S.licFilter;
+  var chips = [['', 'Toutes'], ['active', 'Actives'], ['expiring', 'Expirent bientôt'], ['pending', 'En attente'], ['expired', 'Expirées'], ['revoked', 'Désactivées'], ['stock', 'Réserve']];
+  var h = '<input type="text" id="lic-q" placeholder="Rechercher une clé, un email, un nom…" value="' + esc(f.q) + '" style="margin-bottom:8px">' +
+    '<div class="chips">' + chips.map(function (c) { return '<span class="chip ' + (f.state === c[0] ? 'on' : '') + '" data-act="lic-state" data-v="' + c[0] + '">' + c[1] + '</span>'; }).join('') + '</div>' +
+    '<div class="row" style="margin-bottom:10px"><select id="lic-product" class="grow"><option value="">Toutes les applications</option></select><button class="btn sm" data-act="go" data-to="/licences/new">+ Détaillée</button></div>' +
+    '<div id="lic-list"><div class="spinner"></div></div>';
+  render(page(opts, h));
+  var qIn = document.getElementById('lic-q'), t;
+  qIn.addEventListener('input', function () { clearTimeout(t); t = setTimeout(function () { S.licFilter.q = qIn.value.trim(); S.licPage = 1; loadLicList(false); }, 300); });
+  api('/products').then(function (d) {
+    var sel = document.getElementById('lic-product'); if (!sel) return;
+    sel.innerHTML = '<option value="">Toutes les applications</option>' + d.products.map(function (p) { return '<option value="' + p.id + '"' + (String(f.product) === String(p.id) ? ' selected' : '') + '>' + esc(p.name) + '</option>'; }).join('');
+    sel.addEventListener('change', function () { S.licFilter.product = sel.value; S.licPage = 1; loadLicList(false); });
+  }).catch(function () {});
+  loadLicList(false);
+}
+function licRow(l) {
+  return '<div class="item" data-act="go" data-to="/licences/' + l.id + '"><div class="grow"><div class="row"><b class="mono small">' + esc(l.key) + '</b>' + badge(l) + '</div>' +
+    '<div class="small">' + esc(l.product_name) + (l.offer_label ? ' · ' + esc(l.offer_label) : '') + (l.customer_email ? ' · ' + esc(l.customer_email) : '') + '</div>' +
+    '<div class="muted small">' + esc(expiryText(l)) + ' · ' + l.devices_used + '/' + l.max_devices + ' appareils' + (l.price_cents ? ' · ' + eur(l.price_cents) : '') + '</div></div>' + I.chev + '</div>';
+}
+async function loadLicList(append) {
+  var box = document.getElementById('lic-list'); if (!box) return;
+  var f = S.licFilter;
+  var params = '?q=' + encodeURIComponent(f.q) + (f.state ? '&state=' + f.state : '') + (f.product ? '&product=' + f.product : '') + '&page=' + S.licPage + '&limit=50';
+  try {
+    var d = await api('/licenses' + params);
+    var rows = d.licenses.map(licRow).join('');
+    var more = d.total > S.licPage * d.limit ? '<button class="btn block" data-act="lic-more">Afficher plus (' + (d.total - S.licPage * d.limit) + ' restantes)</button>' : '';
+    if (append) { var old = box.querySelector('.list'); if (old) old.insertAdjacentHTML('beforeend', rows); var ob = box.querySelector('[data-act=lic-more]'); if (ob) ob.remove(); box.insertAdjacentHTML('beforeend', more); }
+    else box.innerHTML = d.licenses.length ? '<p class="muted small">' + plural(d.total, 'licence') + '</p><div class="card list">' + rows + '</div>' + more : '<div class="card">' + empty('🔑', 'Aucune licence', f.q || f.state || f.product ? 'Aucun résultat avec ces filtres.' : 'Faites une vente rapide ou attendez votre première vente en ligne.') + '</div>';
+  } catch (e) { box.innerHTML = errorBox(e); }
+}
+
+async function viewLicence(id) {
+  var opts = { title: 'Licence', back: true, nav: '/licences' };
+  loading(opts);
+  try {
+    var l = (await api('/licenses/' + id)).license;
+    var msg = clientMessage(l, l.product_download_url);
+    var h = '<div class="card"><div class="key">' + esc(l.key) + '</div><div class="actions"><button class="btn grow" data-act="copy" data-text="' + esc(l.key) + '">Copier</button><button class="btn grow blue" data-act="share-text" data-title="Accès ' + esc(l.product_name) + '" data-text="' + esc(msg) + '">📤 Envoyer au client</button></div></div>';
+    h += '<div class="card"><div class="row" style="margin-bottom:8px"><b class="grow">' + esc(l.product_name) + '</b>' + badge(l) + '</div>' +
+      '<div class="kv"><span class="k">Validité</span><span class="right">' + esc(expiryText(l)) + '</span></div>' +
+      (l.activated_at ? '<div class="kv"><span class="k">Activée le</span><span>' + fdate(l.activated_at) + '</span></div>' : '<div class="kv"><span class="k">Durée prévue</span><span>' + esc(fdur(l.duration_days)) + ' après activation</span></div>') +
+      '<div class="kv"><span class="k">Client</span><span class="right">' + (l.customer_email ? '<a href="#/clients/' + l.customer_id + '">' + esc(l.customer_email) + '</a>' : '<span class="muted">aucun</span>') + '</span></div>' +
+      '<div class="kv"><span class="k">Formule</span><span>' + esc(l.offer_label || '—') + ' · ' + eur(l.price_cents) + '</span></div>' +
+      '<div class="kv"><span class="k">Payé par</span><span>' + esc(payLabel(l.payment_method || (l.source === 'paypal' ? 'paypal' : l.source === 'stripe' ? 'stripe' : ''))) + '</span></div>' +
+      '<div class="kv"><span class="k">Origine</span><span>' + (l.source === 'paypal' ? 'Vente PayPal' : l.source === 'stripe' ? 'Vente par carte' : l.source === 'stock' ? 'Clé en réserve' : 'Vente manuelle') + ' · ' + fdate(l.created_at) + '</span></div>' +
+      (l.note ? '<div class="kv"><span class="k">Note</span><span class="right">' + esc(l.note) + '</span></div>' : '') + '</div>';
+    h += '<div class="card"><h3>Appareils (' + l.devices.length + '/' + l.max_devices + ')</h3>' +
+      (l.devices.length ? '<div class="list">' + l.devices.map(function (d) { return '<div class="item static"><div class="grow"><b>' + esc(d.device_name || 'Appareil') + '</b><div class="muted small">vu le ' + fdt(d.last_seen) + ' · <span class="mono">' + esc(d.device_id.slice(0, 16)) + '</span></div></div><button class="btn sm danger" data-act="rm-device" data-lic="' + l.id + '" data-id="' + d.id + '">Retirer</button></div>'; }).join('') + '</div>' : '<div class="muted small">Aucun appareil enregistré pour l\'instant.</div>') +
+      '<div class="actions"><button class="btn sm" data-act="lic" data-a="set_max_devices" data-id="' + l.id + '">Changer le nombre</button>' + (l.devices.length ? '<button class="btn sm" data-act="lic" data-a="reset_devices" data-id="' + l.id + '">Tout réinitialiser</button>' : '') + '</div></div>';
+    h += '<div class="card"><h3>Actions</h3><div class="actions">';
+    if (l.state !== 'revoked') {
+      if (!l.lifetime) h += '<button class="btn sm" data-act="extend" data-id="' + l.id + '" data-days="30">+30 jours</button><button class="btn sm" data-act="extend" data-id="' + l.id + '" data-days="365">+1 an</button><button class="btn sm" data-act="extend" data-id="' + l.id + '">+ Personnalisé</button><button class="btn sm" data-act="lic" data-a="set_expiry" data-id="' + l.id + '">Choisir la date de fin</button><button class="btn sm" data-act="lic" data-a="lifetime" data-id="' + l.id + '">Passer à vie</button>';
+      else h += '<button class="btn sm" data-act="lic" data-a="set_expiry" data-id="' + l.id + '">Fixer une date de fin</button>';
+    }
+    h += '<button class="btn sm" data-act="lic" data-a="set_customer" data-id="' + l.id + '">' + (l.customer_email ? 'Changer le client' : 'Associer un client') + '</button>' +
+      '<button class="btn sm" data-act="lic" data-a="set_price" data-id="' + l.id + '" data-price="' + (l.price_cents / 100).toFixed(2) + '">Prix payé</button>' +
+      (l.source !== 'paypal' && l.source !== 'stripe' ? '<button class="btn sm" data-act="lic" data-a="set_payment_method" data-id="' + l.id + '">Mode de paiement</button>' : '') +
+      '<button class="btn sm" data-act="lic" data-a="resend_email" data-id="' + l.id + '" data-email="' + esc(l.customer_email || '') + '">Envoyer la clé par email</button>' +
+      '<button class="btn sm" data-act="receipt" data-id="' + l.id + '">🧾 Reçu</button>' +
+      '<button class="btn sm" data-act="lic" data-a="note" data-id="' + l.id + '" data-note="' + esc(l.note || '') + '">Note</button>';
+    h += l.state === 'revoked' ? '<button class="btn sm primary" data-act="lic" data-a="reactivate" data-id="' + l.id + '">Réactiver</button>' : '<button class="btn sm danger" data-act="lic" data-a="revoke" data-id="' + l.id + '">Désactiver la licence</button>';
+    if (l.source !== 'paypal') h += '<button class="btn sm danger" data-act="lic" data-a="delete" data-id="' + l.id + '">Supprimer</button>';
+    h += '</div></div>';
+    if (l.events.length) h += '<div class="card"><h3>Historique</h3><div class="list">' + l.events.map(function (ev) { return '<div class="item static"><div class="grow"><b>' + esc(EVENT_LABEL[ev.type] || ev.type) + '</b><div class="muted small">' + esc(ev.detail) + '</div></div><span class="muted small">' + fdt(ev.created_at) + '</span></div>'; }).join('') + '</div></div>';
+    render(page(opts, h));
+  } catch (e) { render(page(opts, errorBox(e))); }
+}
+
+async function licAction(id, action, body) {
+  try { await api('/licenses/' + id + '/' + action, { method: 'POST', body: body || {} }); toast('Enregistré ✓'); viewLicence(id); }
+  catch (e) { toast(e.message, true); }
+}
+
+async function viewNewLicence(prefill) {
+  var qs = parseQuery(); prefill = prefill || {};
+  var opts = { title: 'Licence détaillée', back: true, nav: '/licences' };
+  loading(opts);
+  try {
+    var products = (await api('/products')).products.filter(function (p) { return p.active; });
+    var customer = prefill.customer ? (await api('/customers/' + prefill.customer)).customer : null;
+    if (!products.length) return render(page(opts, '<div class="card">' + empty('📦', 'Créez d\'abord une application', '', '<button class="btn primary" style="margin-top:12px" data-act="go" data-to="/apps/new">Créer une application</button>') + '</div>'));
+    var selP = qs.product ? Number(qs.product) : products[0].id;
+    var h = '<form id="nl"><div class="card">' +
+      '<label class="f">Application</label><select name="product_id">' + products.map(function (p) { return '<option value="' + p.id + '"' + (p.id === selP ? ' selected' : '') + '>' + esc(p.name) + '</option>'; }).join('') + '</select>' +
+      '<label class="f">Durée</label><div class="dur"><input type="number" name="n" min="1" value="1"><select name="unit"><option value="jours">jours</option><option value="mois">mois</option><option value="ans" selected>ans</option><option value="vie">à vie</option></select></div>' +
+      '<label class="f">Appareils autorisés</label><input type="number" name="max_devices" min="1" max="100" value="' + (products.find(function (p) { return p.id === selP; }) || products[0]).max_devices + '">' +
+      '</div><div class="card"><h3>Client (facultatif)</h3>' +
+      '<label class="f">Email du client</label><input type="email" name="email" value="' + esc(customer ? customer.email : '') + '" placeholder="client@exemple.fr">' +
+      '<label class="f">Nom</label><input type="text" name="name" value="' + esc(customer ? customer.name : '') + '">' +
+      '<label class="check"><input type="checkbox" name="send_email" checked> Envoyer la clé par email au client</label>' +
+      '<label class="f">Prix payé (€, pour vos statistiques)</label><input type="number" name="price" step="0.01" min="0" placeholder="0,00">' +
+      '<label class="f">Note (ex : payé en espèces, cadeau…)</label><input type="text" name="note"></div>' +
+      '<button class="btn primary block" type="submit">Générer la clé</button></form>';
+    render(page(opts, h));
+    var form = document.getElementById('nl');
+    form.querySelector('[name=product_id]').addEventListener('change', function (e) { var p = products.find(function (x) { return x.id === Number(e.target.value); }); if (p) form.querySelector('[name=max_devices]').value = p.max_devices; });
+    form.addEventListener('change', function (e) { if (e.target.name === 'unit') form.querySelector('[name=n]').style.visibility = e.target.value === 'vie' ? 'hidden' : 'visible'; });
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var f = new FormData(form), btn = form.querySelector('[type=submit]'); btn.disabled = true;
+      var days = toDays(f.get('n'), f.get('unit'));
+      var body = { product_id: Number(f.get('product_id')), days: days, max_devices: Number(f.get('max_devices')), email: f.get('email') || undefined, name: f.get('name') || undefined, send_email: !!f.get('send_email') && !!f.get('email'), price_cents: parsePrice(f.get('price')), note: f.get('note') || '', offer_label: cap(fdur(days)) };
+      try {
+        var r = await api('/licenses', { method: 'POST', body: body });
+        var l = r.license; l._emailSent = r.email_sent;
+        var prod = products.find(function (x) { return x.id === l.product_id; });
+        showSaleResult(l, prod ? prod.download_url : '');
+      } catch (err) { toast(err.message, true); btn.disabled = false; }
+    });
+  } catch (e) { render(page(opts, errorBox(e))); }
+}
+
+/* ======================= Réserve de clés ======================= */
+async function viewStock() {
+  var opts = { title: 'Réserve de clés', back: true, nav: '/plus' };
+  loading(opts);
+  try {
+    var d = await api('/stock'), pr = await api('/products');
+    var products = pr.products.filter(function (p) { return p.active; });
+    var groups = {};
+    d.stock.forEach(function (s) { var k = s.product_id + '|' + s.duration_days; (groups[k] = groups[k] || { product_name: s.product_name, product_id: s.product_id, days: s.duration_days, items: [] }).items.push(s); });
+    var h = '<div class="card"><b>Pour vendre sans réseau</b><p class="muted small" style="margin:6px 0 0">Préparez des clés à l\'avance : elles sont enregistrées sur le serveur <i>et</i> dans votre téléphone. Sans connexion, « Vente rapide » en prend une dans la réserve ; la vente est synchronisée dès que le réseau revient. Le client, lui, active sa clé normalement.</p></div>';
+    var gk = Object.keys(groups);
+    h += gk.length ? gk.map(function (k) {
+      var g = groups[k];
+      return '<div class="card"><div class="row"><b class="grow">' + esc(g.product_name) + ' · ' + esc(fdur(g.days)) + '</b><span class="badge b-stock">' + plural(g.items.length, 'clé') + '</span></div>' +
+        '<details><summary class="small muted">Voir les clés</summary><div class="list">' + g.items.map(function (s) { return '<div class="item static"><span class="mono small grow">' + esc(s.key) + '</span><button class="btn sm" data-act="copy" data-text="' + esc(s.key) + '">Copier</button><button class="btn sm danger" data-act="del-stock" data-id="' + s.id + '">×</button></div>'; }).join('') + '</div></details></div>';
+    }).join('') : '<div class="card">' + empty('🗂️', 'Aucune clé en réserve', 'Préparez-en ci-dessous.') + '</div>';
+    if (products.length) {
+      h += '<div class="card"><h3>Préparer des clés</h3><form id="stock-form"><label class="f">Application</label><select name="product_id">' + products.map(function (p) { return '<option value="' + p.id + '">' + esc(p.name) + '</option>'; }).join('') + '</select>' +
+        '<label class="f">Durée</label><div class="dur"><input type="number" name="n" min="1" value="1"><select name="unit"><option value="jours">jours</option><option value="mois">mois</option><option value="ans" selected>ans</option><option value="vie">à vie</option></select></div>' +
+        '<label class="f">Nombre de clés</label><select name="count"><option>5</option><option>10</option><option>20</option></select>' +
+        '<button class="btn primary block" type="submit">Préparer</button></form></div>';
+    }
+    render(page(opts, h));
+    var form = document.getElementById('stock-form');
+    if (form) form.addEventListener('submit', async function (e) {
+      e.preventDefault(); var f = new FormData(form); form.querySelector('button').disabled = true;
+      try { await api('/stock', { method: 'POST', body: { product_id: Number(f.get('product_id')), days: toDays(f.get('n'), f.get('unit')), count: Number(f.get('count')) } }); await api('/stock'); toast('Clés préparées ✓'); viewStock(); }
+      catch (err) { toast(err.message, true); form.querySelector('button').disabled = false; }
+    });
+  } catch (e) { render(page(opts, errorBox(e))); }
+}
+
+/* ======================= Commandes à valider ======================= */
+async function viewOrders() {
+  var qs = parseQuery(), all = qs.all === '1';
+  var opts = { title: 'Paiements à valider', back: true, nav: '/' };
+  loading(opts);
+  try {
+    var d = await api('/orders?status=' + (all ? 'all' : 'pending'), { noCache: all });
+    var chips = '<div class="chips"><a class="chip ' + (!all ? 'on' : '') + '" href="#/commandes">À valider</a><a class="chip ' + (all ? 'on' : '') + '" href="#/commandes?all=1">Historique</a></div>';
+    var h = chips;
+    if (!d.orders.length) h += '<div class="card">' + empty('✅', all ? 'Aucune commande' : 'Rien à valider', all ? '' : 'Quand un client choisit « virement », « Lydia », « Wero »… sur votre page de vente, sa commande apparaît ici. Vérifiez l\'argent reçu, puis appuyez sur « Payé ».') + '</div>';
+    else h += d.orders.map(function (o) {
+      var st = o.status === 'pending' ? '<span class="badge b-expiring">à valider</span>' : o.status === 'paid' ? '<span class="badge b-active">payée</span>' : '<span class="badge b-revoked">annulée</span>';
+      return '<div class="card"><div class="row"><div class="grow"><b>' + esc(o.product_name) + (o.offer_label ? ' · ' + esc(o.offer_label) : '') + '</b> ' + st +
+        '<div class="small">' + eur(o.amount_cents) + ' par <b>' + esc(o.method_label) + '</b> · réf. <span class="mono">' + esc(o.ref) + '</span></div>' +
+        '<div class="muted small">' + esc(o.name ? o.name + ' · ' : '') + esc(o.email) + ' · ' + fdt(o.created_at) + (o.paid_at ? ' · payée le ' + fdate(o.paid_at) : '') + '</div>' +
+        (o.license_key ? '<div class="muted small mono">' + esc(o.license_key) + '</div>' : '') + '</div></div>' +
+        (o.status === 'pending' ? '<div class="actions"><button class="btn primary grow" data-act="order-paid" data-id="' + o.id + '" data-amount="' + o.amount_cents + '">✅ Payé, envoyer la clé</button><button class="btn danger" data-act="order-cancel" data-id="' + o.id + '">Annuler</button></div>' :
+         o.status === 'paid' && o.license_id ? '<div class="actions"><button class="btn sm" data-act="go" data-to="/licences/' + o.license_id + '">Voir la licence</button></div>' :
+         o.status === 'cancelled' ? '<div class="actions"><button class="btn sm" data-act="order-reopen" data-id="' + o.id + '">Rouvrir</button></div>' : '') + '</div>';
+    }).join('');
+    h += '<div class="card"><p class="muted small" style="margin:0">Pour proposer ces moyens de paiement sur votre page de vente et indiquer vos coordonnées (IBAN, numéro Lydia…) : <a href="#/reglages">Réglages → Moyens de paiement</a>.</p></div>';
+    render(page(opts, h));
+  } catch (e) { render(page(opts, errorBox(e))); }
+}
+
+/* ======================= Clients ======================= */
+async function viewClients() {
+  var opts = { title: 'Clients', nav: '/clients' };
+  render(page(opts, '<input type="text" id="cl-q" placeholder="Rechercher un email ou un nom…" style="margin-bottom:10px"><div id="cl-list"><div class="spinner"></div></div>'));
+  var qIn = document.getElementById('cl-q'), t;
+  qIn.addEventListener('input', function () { clearTimeout(t); t = setTimeout(function () { loadClients(qIn.value.trim()); }, 300); });
+  loadClients('');
+}
+async function loadClients(q) {
+  var box = document.getElementById('cl-list'); if (!box) return;
+  try {
+    var d = await api('/customers?q=' + encodeURIComponent(q));
+    box.innerHTML = d.customers.length ? '<div class="card list">' + d.customers.map(function (c) {
+      return '<div class="item" data-act="go" data-to="/clients/' + c.id + '"><div class="grow"><b class="ellipsis" style="display:block">' + esc(c.email) + '</b><div class="muted small">' + (c.name ? esc(c.name) + ' · ' : '') + plural(c.licenses_count, 'licence') + ' · ' + plural(c.active_count || 0, 'active') + '</div></div><div class="right"><b>' + eur(c.total_paid) + '</b><div class="muted small">' + fdate(c.last_purchase) + '</div></div>' + I.chev + '</div>';
+    }).join('') + '</div>' : '<div class="card">' + empty('👤', 'Aucun client', q ? 'Aucun résultat.' : 'Les clients apparaissent ici après un achat ou quand vous associez un email à une licence.') + '</div>';
+  } catch (e) { box.innerHTML = errorBox(e); }
+}
+async function viewClient(id) {
+  var opts = { title: 'Client', back: true, nav: '/clients' };
+  loading(opts);
+  try {
+    var c = (await api('/customers/' + id)).customer;
+    var h = '<div class="card"><b style="word-break:break-all">' + esc(c.email) + '</b><div class="muted">' + esc(c.name || 'Nom non renseigné') + '</div><div class="muted small">Client depuis le ' + fdate(c.created_at) + ' · total payé ' + eur(c.total_paid) + '</div>' +
+      '<div class="actions"><button class="btn sm" data-act="edit-client" data-id="' + c.id + '" data-name="' + esc(c.name) + '" data-email="' + esc(c.email) + '">Modifier</button><a class="btn sm" href="mailto:' + esc(c.email) + '">Écrire un email</a><button class="btn sm primary" data-act="go" data-to="/licences/new/' + c.id + '">+ Nouvelle licence</button></div></div>';
+    h += '<h2>Licences (' + c.licenses.length + ')</h2>' + (c.licenses.length ? '<div class="card list">' + c.licenses.map(licRow).join('') + '</div>' : '<div class="card muted small">Aucune licence.</div>');
+    render(page(opts, h));
+  } catch (e) { render(page(opts, errorBox(e))); }
+}
+
+/* ======================= Finances ======================= */
+async function viewFinances() {
+  var opts = { title: 'Finances', back: true, nav: '/' };
+  loading(opts);
+  try {
+    var d = await api('/finances'), t = d.totals;
+    var h = '<div class="grid2">' +
+      '<div class="stat accent"><div class="l">Cette année</div><div class="v">' + eur(t.revenue_year) + '</div><div class="l">ce mois : ' + eur(t.revenue_month) + '</div></div>' +
+      '<div class="stat"><div class="l">Total encaissé</div><div class="v">' + eur(t.revenue) + '</div><div class="l">' + plural(t.count, 'vente') + ' · panier moyen ' + eur(t.average) + '</div></div>' +
+      '<div class="stat small"><div class="l">Frais plateformes estimés</div><div class="v" style="color:var(--amber)">− ' + eur(t.paypal_fees) + '</div><div class="l">PayPal ' + d.fee_pct + ' % + ' + eur(d.fee_fixed_cents) + ' · Stripe ' + d.stripe_fee_pct + ' % + ' + eur(d.stripe_fee_fixed_cents) + '</div></div>' +
+      '<div class="stat small"><div class="l">Net estimé</div><div class="v" style="color:var(--accent)">' + eur(t.net) + '</div><div class="l">PayPal ' + eur(t.paypal_revenue) + ' · carte ' + eur(t.stripe_revenue || 0) + ' · direct ' + eur(t.manual_revenue) + '</div></div></div>';
+    if (d.refunds_year) h += '<p class="small muted">' + plural(d.refunds_year, 'remboursement') + ' cette année.</p>';
+    h += '<div class="card"><h3>Mois par mois</h3>' + (d.months.length ? '<table class="t"><tr><th>Mois</th><th>Ventes</th><th>CA</th><th>Frais</th><th>Net</th></tr>' + d.months.slice().reverse().map(function (m) { return '<tr><td>' + esc(fmonth(m.month)) + '</td><td>' + m.count + '</td><td>' + eur(m.revenue) + '</td><td>−' + eur(m.paypal_fees) + '</td><td><b>' + eur(m.net) + '</b></td></tr>'; }).join('') + '</table>' : '<div class="muted small">Aucune vente enregistrée pour le moment.</div>') + '</div>';
+    if (d.pending_orders && d.pending_orders.n) h += '<div class="card" style="border-color:var(--blue);cursor:pointer" data-act="go" data-to="/commandes"><b>💶 ' + plural(d.pending_orders.n, 'paiement') + ' à valider · ' + eur(d.pending_orders.amount) + '</b><div class="muted small">Commandes en attente de votre confirmation.</div></div>';
+    if (d.by_method && d.by_method.length) h += '<div class="card"><h3>Par moyen de paiement</h3><table class="t"><tr><th>Moyen</th><th>Ventes</th><th>CA</th></tr>' + d.by_method.map(function (m) { return '<tr><td>' + esc(payLabel(m.method)) + '</td><td>' + m.count + '</td><td>' + eur(m.revenue) + '</td></tr>'; }).join('') + '</table></div>';
+    if (d.by_product.some(function (p) { return p.count; })) h += '<div class="card"><h3>Par application</h3><table class="t"><tr><th>Application</th><th>Ventes</th><th>CA</th></tr>' + d.by_product.map(function (p) { return '<tr><td>' + esc(p.name) + '</td><td>' + p.count + '</td><td>' + eur(p.revenue) + '</td></tr>'; }).join('') + '</table></div>';
+    if (d.by_offer.length) h += '<div class="card"><h3>Par formule</h3><table class="t"><tr><th>Formule</th><th>Ventes</th><th>CA</th></tr>' + d.by_offer.map(function (o) { return '<tr><td>' + esc(o.product_name) + ' · ' + esc(o.offer_label || '—') + '</td><td>' + o.count + '</td><td>' + eur(o.revenue) + '</td></tr>'; }).join('') + '</table></div>';
+    if (d.top_customers.length) h += '<div class="card"><h3>Meilleurs clients</h3><div class="list">' + d.top_customers.map(function (c) { return '<div class="item" data-act="go" data-to="/clients/' + c.id + '"><div class="grow ellipsis">' + esc(c.name || c.email) + '<div class="muted small">' + plural(c.count, 'achat') + '</div></div><b>' + eur(c.revenue) + '</b>' + I.chev + '</div>'; }).join('') + '</div></div>';
+    h += '<div class="card"><h3>Pour votre comptabilité</h3><p class="muted small">Export de toutes les ventes (date, application, formule, prix, mode de paiement, client, clé) au format tableur.</p><div class="actions"><button class="btn grow" data-act="export-csv">📄 Exporter en CSV</button><button class="btn grow" data-act="go" data-to="/reglages">Modifier les frais estimés</button></div><p class="muted small" style="margin-top:8px">Les reçus se génèrent depuis chaque licence (bouton 🧾 Reçu). Renseignez vos coordonnées dans Réglages → Vendeur.</p></div>';
+    render(page(opts, h));
+  } catch (e) { render(page(opts, errorBox(e))); }
+}
+async function exportCsv() {
+  toast('Préparation de l\'export…');
+  try {
+    var res = await fetch(srv().url + '/admin/api/export/sales.csv', { headers: { Authorization: 'Bearer ' + srv().token } });
+    if (!res.ok) throw new Error('Export impossible (' + res.status + ')');
+    var blob = await res.blob(), name = 'ventes-' + new Date().toISOString().slice(0, 10) + '.csv';
+    var file = new File([blob], name, { type: 'text/csv' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: 'Export des ventes' }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    toast('Fichier téléchargé ✓');
+  } catch (e) { toast(e.message, true); }
+}
+
+/* ======================= Plus / Serveurs / Réglages ======================= */
+function viewMore() {
+  var items = [['/commandes', '🧾', 'Paiements à valider', 'Commandes par virement, Lydia, Wero, espèces…'], ['/finances', '💶', 'Finances', 'Chiffre d\'affaires, frais, export comptable'], ['/reserve', '🗂️', 'Réserve de clés', 'Pour vendre sans connexion'], ['/reglages', '⚙️', 'Réglages', 'PayPal, emails, coordonnées, mot de passe'], ['/serveurs', '🖥️', 'Serveurs', 'Serveur actuel, capacité, ajouter un serveur'], ['/journal', '📜', 'Journal d\'activité', 'Ventes, activations, erreurs'], ['/guide', '📖', 'Guide rapide', 'Comment vendre, gérer un client, limites']];
+  var h = '<div class="card list">' + items.map(function (it) { return '<div class="item" data-act="go" data-to="' + it[0] + '"><span style="font-size:24px">' + it[1] + '</span><div class="grow"><b>' + it[2] + '</b><div class="muted small">' + it[3] + '</div></div>' + I.chev + '</div>'; }).join('') + '</div>';
+  h += '<button class="btn block" data-act="logout">Se déconnecter de ce serveur</button>';
+  render(page({ title: 'Plus', nav: '/plus' }, h));
+}
+
+async function viewServers() {
+  var opts = { title: 'Serveurs', back: true, nav: '/plus' };
+  loading(opts);
+  var cur = srv(), health = null, stats = null, errMsg = '';
+  try { health = await api('/health'); stats = await api('/stats'); } catch (e) { errMsg = e.message; }
+  var h = '<div class="card"><div class="row"><div class="grow"><b>' + esc(cur.name) + '</b><div class="muted small mono" style="word-break:break-all">' + esc(cur.url) + '</div></div><span class="badge ' + (health && !S.offline ? 'b-active' : 'b-revoked') + '">' + (health && !S.offline ? 'en ligne' : 'hors ligne') + '</span></div>';
+  if (health) {
+    var pct = Math.min(100, Math.round(100 * (stats.requests_today || 0) / 100000));
+    h += '<div class="kv"><span class="k">Version</span><span>' + esc(health.version) + '</span></div>' +
+      '<div class="kv"><span class="k">Applications / licences / clients</span><span>' + health.counts.products + ' / ' + health.counts.licenses + ' / ' + health.counts.customers + '</span></div>' +
+      '<div class="kv"><span class="k">Requêtes aujourd\'hui</span><span>' + stats.requests_today + ' / 100 000 gratuites</span></div><div class="bar"><i style="width:' + pct + '%"></i></div>' +
+      '<p class="muted small">Le plan gratuit de Cloudflare autorise 100 000 requêtes par jour et 5 Go de données. Une application vérifie sa licence environ une fois par jour : ce serveur peut donc servir des dizaines de milliers de clients.</p>';
+  } else h += '<p class="small" style="color:var(--red)">' + esc(errMsg) + '</p>';
+  h += '<div class="actions"><button class="btn sm" data-act="rename-server">Renommer</button></div></div>';
+  h += '<h2>Mes serveurs</h2><div class="card list">' + S.servers.map(function (s, i) {
+    return '<div class="item static"><div class="grow"><b>' + esc(s.name) + '</b>' + (i === S.current ? ' <span class="badge b-active">actuel</span>' : '') + '<div class="muted small mono ellipsis">' + esc(s.url) + '</div></div>' +
+      (i !== S.current ? '<button class="btn sm" data-act="switch-server" data-i="' + i + '">Utiliser</button>' : '') + (S.servers.length > 1 ? '<button class="btn sm danger" data-act="rm-server" data-i="' + i + '">×</button>' : '') + '</div>';
+  }).join('') + '</div>';
+  h += '<div class="card"><h3>Ajouter un serveur existant</h3><form id="add-srv"><label class="f">Nom</label><input type="text" name="name" placeholder="Serveur 2" required><label class="f">Adresse</label><input type="url" name="url" placeholder="https://licences-2.xxx.workers.dev" required><label class="f">Mot de passe administrateur</label><input type="password" name="password" required><button class="btn primary block" type="submit">Ajouter et se connecter</button></form></div>';
+  h += '<div class="card"><h3>Créer un nouveau serveur gratuit</h3><p class="muted small">Utile pour séparer des activités, ou si vous approchiez un jour de la limite gratuite.</p><ol class="steps small">' +
+    '<li>Sur votre ordinateur, dans le dossier du projet : <code>npm run setup -- --name licences-2</code></li>' +
+    '<li>Le script crée une nouvelle base, demande un mot de passe et déploie. Il affiche l\'adresse du nouveau serveur.</li>' +
+    '<li>Ajoutez cette adresse ci-dessus. Vous passez d\'un serveur à l\'autre à tout moment.</li>' +
+    '<li>Pour un compte Cloudflare différent (nouvelle limite de 100 000 requêtes/jour) : <code>npx wrangler logout</code> puis reconnectez-vous avec l\'autre compte avant l\'étape 1.</li></ol></div>';
+  render(page(opts, h));
+  document.getElementById('add-srv').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var f = new FormData(e.target), url = normalizeUrl(f.get('url')), btn = e.target.querySelector('button'); btn.disabled = true;
+    try {
+      var r = await api('/login', { method: 'POST', body: { password: f.get('password') }, noAuthRedirect: true }, { url: url, token: null });
+      S.servers.push({ name: f.get('name'), url: url, token: r.token }); S.current = S.servers.length - 1; saveServers(); toast('Serveur ajouté ✓'); go('/');
+    } catch (err) { toast(err.message, true); btn.disabled = false; }
+  });
+}
+
+async function viewSettings() {
+  var opts = { title: 'Réglages', back: true, nav: '/plus' };
+  loading(opts);
+  try {
+    var hl = await api('/health?test=1', { noCache: true }), st = (await api('/settings', { noCache: true })).settings, pm = await api('/payment-methods', { noCache: true });
+    var pp = hl.paypal, em = hl.email, sp = hl.stripe || {};
+    var manualConf = []; try { manualConf = JSON.parse(st.manual_methods || '[]'); } catch (e) { manualConf = []; }
+    var ok = function (b, t, f) { return '<span class="badge ' + (b ? 'b-active' : 'b-revoked') + '">' + (b ? (t || 'OK') : (f || 'manquant')) + '</span>'; };
+    var secretField = function (key, label, placeholder) { return '<label class="f">' + label + (st[key + '_set'] ? ' <span class="badge b-active">défini ✓</span>' : '') + '</label><input type="password" name="' + key + '" placeholder="' + (st[key + '_set'] ? 'Laisser vide pour ne pas changer' : (placeholder || '')) + '" autocomplete="off">'; };
+    var h = '';
+    // Boutique
+    h += '<form class="card" data-settings="shop"><h3>Boutique</h3><label class="f">Nom affiché (application, emails, pages)</label><input type="text" name="app_name" value="' + esc(st.app_name) + '"><label class="f">Devise</label><select name="currency">' + ['EUR', 'CHF', 'CAD', 'USD', 'GBP'].map(function (c) { return '<option' + (st.currency === c ? ' selected' : '') + '>' + c + '</option>'; }).join('') + '</select><button class="btn primary sm block" type="submit">Enregistrer</button></form>';
+    // PayPal
+    h += '<form class="card" data-settings="paypal"><h3>PayPal ' + ok(pp.configured, pp.env === 'live' ? 'réel' : 'test (sandbox)', 'non configuré') + '</h3>' +
+      (pp.test ? '<div class="kv"><span class="k">Connexion à PayPal</span>' + ok(pp.test.ok, 'fonctionne', 'échec') + '</div>' + (!pp.test.ok ? '<p class="small" style="color:var(--red)">' + esc(pp.test.error) + '</p>' : '') : '') +
+      '<details><summary class="small">Où trouver ces informations ?</summary><ol class="steps small muted"><li>Compte PayPal <b>Business</b> (gratuit).</li><li><a href="https://developer.paypal.com/dashboard/applications" target="_blank" rel="noopener">developer.paypal.com → Apps & Credentials</a> → <b>Create App</b>.</li><li>Onglet <b>Sandbox</b> (test) ou <b>Live</b> (réel) : copiez le Client ID et le Secret.</li><li>Webhook : dans la même app → <b>Add Webhook</b>, URL ci-dessous, événements « Checkout order approved », « Payment capture completed », « Payment capture refunded », « Payment capture reversed ». Copiez le Webhook ID.</li></ol></details>' +
+      '<label class="f">Mode</label><select name="paypal_env"><option value="sandbox"' + (st.paypal_env !== 'live' ? ' selected' : '') + '>Test (sandbox) – faux paiements</option><option value="live"' + (st.paypal_env === 'live' ? ' selected' : '') + '>Réel (live) – vrais paiements</option></select>' +
+      '<label class="f">Client ID</label><input type="text" name="paypal_client_id" value="' + esc(st.paypal_client_id) + '" autocomplete="off">' +
+      secretField('paypal_secret', 'Secret') + secretField('paypal_webhook_id', 'Webhook ID (recommandé)') +
+      '<p class="muted small">Adresse du webhook à déclarer chez PayPal :</p><div class="row"><code class="grow">' + esc(hl.webhook_url) + '</code><button type="button" class="btn sm" data-act="copy" data-text="' + esc(hl.webhook_url) + '">Copier</button></div>' +
+      '<button class="btn primary sm block" type="submit">Enregistrer et tester</button></form>';
+    // Stripe (carte bancaire)
+    h += '<form class="card" data-settings="stripe"><h3>Carte bancaire via Stripe ' + ok(sp.configured, sp.live ? 'réel' : 'test', 'non configuré') + '</h3>' +
+      '<p class="muted small">Cartes, Apple Pay, Google Pay. Frais Stripe ≈ 1,5 % + 0,25 € par vente en Europe. Facultatif si PayPal vous suffit (PayPal accepte déjà la carte sans compte).</p>' +
+      (sp.test ? '<div class="kv"><span class="k">Connexion à Stripe</span>' + ok(sp.test.ok, 'fonctionne', 'échec') + '</div>' + (!sp.test.ok ? '<p class="small" style="color:var(--red)">' + esc(sp.test.error) + '</p>' : '') : '') +
+      '<details><summary class="small">Où trouver ces informations ?</summary><ol class="steps small muted"><li>Compte gratuit sur <a href="https://dashboard.stripe.com/register" target="_blank" rel="noopener">stripe.com</a> (activez-le avec vos informations pour encaisser en réel).</li><li><b>Développeurs → Clés API</b> : copiez la <b>clé secrète</b> (sk_test_… pour tester, sk_live_… pour le réel).</li><li><b>Développeurs → Webhooks → Ajouter un point de terminaison</b> : URL ci-dessous, événements <i>checkout.session.completed</i> et <i>charge.refunded</i>. Copiez le <b>secret de signature</b> (whsec_…).</li></ol></details>' +
+      secretField('stripe_secret_key', 'Clé secrète (sk_…)') + secretField('stripe_webhook_secret', 'Secret de signature du webhook (whsec_…)') +
+      '<p class="muted small">Adresse du webhook à déclarer chez Stripe :</p><div class="row"><code class="grow">' + esc(hl.stripe_webhook_url) + '</code><button type="button" class="btn sm" data-act="copy" data-text="' + esc(hl.stripe_webhook_url) + '">Copier</button></div>' +
+      '<button class="btn primary sm block" type="submit">Enregistrer et tester</button></form>';
+    // Moyens de paiement manuels
+    h += '<form class="card" id="methods-form"><h3>Autres moyens de paiement ' + ok((hl.manual_methods || []).length, plural((hl.manual_methods || []).length, 'activé'), 'aucun') + '</h3>' +
+      '<p class="muted small">Virement, Lydia, Wero, espèces… Le client commande sur votre page de vente et reçoit vos consignes ; la commande apparaît dans <b>Paiements à valider</b>. Quand l\'argent est arrivé, vous appuyez sur « Payé » et la clé part automatiquement.</p>' +
+      pm.catalog.map(function (c) {
+        var conf = manualConf.find(function (x) { return x.id === c.id; }) || {};
+        return '<div style="border-top:1px solid var(--line);padding:8px 0"><label class="check"><input type="checkbox" name="en_' + c.id + '"' + (conf.enabled ? ' checked' : '') + '> <b>' + esc(c.label) + '</b></label>' +
+          '<textarea name="in_' + c.id + '" placeholder="' + esc(c.hint) + '" style="min-height:52px">' + esc(conf.instructions || '') + '</textarea></div>';
+      }).join('') +
+      '<label class="check" style="margin-top:6px"><input type="checkbox" name="notify_orders"' + (st.notify_orders !== '0' ? ' checked' : '') + '> M\'envoyer un email à chaque commande à valider (adresse : Réglages → Vendeur → Email de contact)</label>' +
+      '<button class="btn primary sm block" type="submit">Enregistrer</button></form>';
+    // Emails
+    h += '<form class="card" data-settings="email"><h3>Emails automatiques ' + ok(em.configured, em.provider === 'brevo' ? 'Brevo' : 'Resend', 'non configurés') + '</h3>' +
+      '<p class="muted small">Sans cela, le client voit sa clé à l\'écran mais ne la reçoit pas par email.</p>' +
+      '<details><summary class="small">Comment obtenir une clé Brevo (gratuit, 300 emails/jour) ?</summary><ol class="steps small muted"><li>Compte gratuit sur <a href="https://www.brevo.com" target="_blank" rel="noopener">brevo.com</a>.</li><li>Expéditeurs → ajoutez votre adresse email et confirmez-la.</li><li>Votre nom (en haut à droite) → SMTP & API → Clés API → Générer.</li></ol></details>' +
+      secretField('brevo_api_key', 'Clé API Brevo') + secretField('resend_api_key', 'Clé API Resend (si vous préférez Resend)') +
+      '<label class="f">Adresse expéditrice (vérifiée chez le fournisseur)</label><input type="email" name="email_from" value="' + esc(st.email_from) + '"><label class="f">Nom de l\'expéditeur</label><input type="text" name="email_from_name" value="' + esc(st.email_from_name) + '">' +
+      '<div class="actions"><button class="btn primary sm grow" type="submit">Enregistrer</button>' + (em.configured ? '<button type="button" class="btn sm grow" data-act="test-email">Envoyer un email de test</button>' : '') + '</div></form>';
+    // Vendeur
+    h += '<form class="card" data-settings="seller"><h3>Vendeur (pour les reçus) ' + ok(hl.seller_set, 'renseigné', 'à compléter') + '</h3>' +
+      '<label class="f">Nom ou raison sociale</label><input type="text" name="seller_name" value="' + esc(st.seller_name) + '"><label class="f">Adresse</label><textarea name="seller_address" style="min-height:60px">' + esc(st.seller_address) + '</textarea>' +
+      '<label class="f">SIRET</label><input type="text" name="seller_siret" value="' + esc(st.seller_siret) + '"><label class="f">Email de contact</label><input type="email" name="seller_email" value="' + esc(st.seller_email) + '"><label class="f">Téléphone</label><input type="tel" name="seller_phone" value="' + esc(st.seller_phone) + '">' +
+      '<label class="f">Mention TVA sur les reçus</label><input type="text" name="seller_vat_note" value="' + esc(st.seller_vat_note || 'TVA non applicable, art. 293 B du CGI.') + '">' +
+      '<label class="f">Frais PayPal estimés : pourcentage</label><input type="number" step="0.01" name="paypal_fee_pct" value="' + esc(st.paypal_fee_pct || '2.9') + '"><label class="f">Frais PayPal estimés : fixe par vente (€)</label><input type="number" step="0.01" name="paypal_fee_fixed" value="' + esc(st.paypal_fee_fixed || '0.35') + '">' +
+      '<label class="f">Frais Stripe estimés : pourcentage</label><input type="number" step="0.01" name="stripe_fee_pct" value="' + esc(st.stripe_fee_pct || '1.5') + '"><label class="f">Frais Stripe estimés : fixe par vente (€)</label><input type="number" step="0.01" name="stripe_fee_fixed" value="' + esc(st.stripe_fee_fixed || '0.25') + '">' +
+      '<button class="btn primary sm block" type="submit">Enregistrer</button></form>';
+    // Mot de passe
+    h += '<form class="card" id="pw-form"><h3>Mot de passe administrateur</h3><label class="f">Mot de passe actuel</label><input type="password" name="current" autocomplete="current-password" required><label class="f">Nouveau mot de passe (8 caractères min.)</label><input type="password" name="new" autocomplete="new-password" required minlength="8"><label class="f">Confirmer</label><input type="password" name="confirm" autocomplete="new-password" required><button class="btn sm block" type="submit">Changer le mot de passe</button></form>';
+    // Installation + infos
+    h += '<div class="card"><h3>Installer sur le téléphone</h3><p class="muted small">Ajoutez l\'application à l\'écran d\'accueil pour l\'ouvrir en plein écran, même sans réseau (données en cache).</p>' +
+      (S.deferredInstall ? '<button class="btn primary block" data-act="install">Installer maintenant</button>' : '<ul class="small muted steps"><li><b>Android (Chrome)</b> : menu ⋮ → « Installer l\'application » / « Ajouter à l\'écran d\'accueil ».</li><li><b>iPhone (Safari)</b> : bouton Partager → « Sur l\'écran d\'accueil ».</li></ul>') + '</div>';
+    h += '<div class="card"><h3>Liens utiles</h3><div class="kv"><span class="k">Page « J\'ai un code »</span><button class="btn sm" data-act="copy" data-text="' + esc(hl.go_url) + '">Copier</button></div><div class="muted small mono" style="word-break:break-all">' + esc(hl.go_url) + '</div><p class="muted small" style="margin-top:8px">Vos clients y tapent leur code pour retrouver leur lien de téléchargement.</p></div>';
+    h += '<p class="muted small right">Version ' + esc(hl.version) + ' · ' + esc(hl.server_url) + (hl.password_in_app ? ' · mot de passe géré dans l\'app' : '') + '</p>';
+    render(page(opts, h));
+
+    document.querySelectorAll('form[data-settings]').forEach(function (form) {
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var f = new FormData(form), body = {};
+        f.forEach(function (v, k) { body[k] = String(v); });
+        var btn = form.querySelector('[type=submit]'); btn.disabled = true;
+        try { await api('/settings', { method: 'PUT', body: body }); toast('Réglages enregistrés ✓'); viewSettings(); }
+        catch (err) { toast(err.message, true); btn.disabled = false; }
+      });
+    });
+    document.getElementById('methods-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      var f = new FormData(e.target);
+      var arr = pm.catalog.map(function (c) { return { id: c.id, enabled: !!f.get('en_' + c.id), instructions: String(f.get('in_' + c.id) || '').trim() }; });
+      var missing = arr.filter(function (x) { return x.enabled && !x.instructions && x.id !== 'cash'; });
+      if (missing.length) return toast('Indiquez vos consignes pour : ' + missing.map(function (x) { return payLabel(x.id); }).join(', '), true);
+      var btn = e.target.querySelector('[type=submit]'); btn.disabled = true;
+      try { await api('/settings', { method: 'PUT', body: { manual_methods: JSON.stringify(arr), notify_orders: f.get('notify_orders') ? '1' : '0' } }); toast('Moyens de paiement enregistrés ✓'); viewSettings(); }
+      catch (err) { toast(err.message, true); btn.disabled = false; }
+    });
+    document.getElementById('pw-form').addEventListener('submit', async function (e) {
+      e.preventDefault(); var f = new FormData(e.target);
+      if (f.get('new') !== f.get('confirm')) return toast('Les deux mots de passe ne correspondent pas', true);
+      try { var r = await api('/password', { method: 'POST', body: { current: f.get('current'), new: f.get('new') } }); srv().token = r.token; saveServers(); toast('Mot de passe changé ✓'); e.target.reset(); }
+      catch (err) { toast(err.message, true); }
+    });
+  } catch (e) { render(page(opts, errorBox(e))); }
+}
+
+async function viewJournal() {
+  var qs = parseQuery(), errorsOnly = qs.errors === '1';
+  var opts = { title: 'Journal d\'activité', back: true, nav: '/plus' };
+  loading(opts);
+  try {
+    var d = await api('/events?limit=150' + (errorsOnly ? '&errors=1' : ''));
+    var chips = '<div class="chips"><a class="chip ' + (!errorsOnly ? 'on' : '') + '" href="#/journal">Tout</a><a class="chip ' + (errorsOnly ? 'on' : '') + '" href="#/journal?errors=1">Erreurs seulement</a></div>';
+    render(page(opts, chips + (d.events.length ? '<div class="card list">' + d.events.map(eventRow).join('') + '</div>' : '<div class="card">' + empty(errorsOnly ? '✅' : '📜', errorsOnly ? 'Aucune erreur' : 'Aucun événement', errorsOnly ? 'Tout fonctionne.' : 'Les ventes, activations et erreurs apparaîtront ici.') + '</div>')));
+  } catch (e) { render(page(opts, errorBox(e))); }
+}
+
+function viewGuide() {
+  var h = '<div class="card"><h3>1. Vendre quand vous êtes avec la personne</h3><p class="small muted">Accueil → <b>⚡ Vente rapide</b> → l\'application, la durée (vos formules servent de raccourcis, ou « Autre… » pour un prix/durée libre), le prix encaissé → <b>Générer la clé</b>. Appuyez sur <b>Envoyer au client</b> : le message (lien de téléchargement + code + mode d\'emploi) part par SMS, WhatsApp ou email. La personne télécharge, colle le code, c\'est réglé.</p></div>' +
+    '<div class="card"><h3>2. Vendre en ligne, automatiquement</h3><ol class="steps small"><li>Onglet <b>Apps</b> → <b>+ Ajouter</b> : nom, lien de téléchargement, formules (durée + prix).</li><li><b>Partager la page de vente</b> : envoyez le lien, mettez-le sur un site, une plateforme, les réseaux.</li><li>Le client paie avec PayPal ou sa carte, voit sa clé immédiatement et la reçoit par email. Vous n\'avez rien à faire.</li></ol></div>' +
+    '<div class="card"><h3>Les moyens de paiement</h3><ul class="steps small muted"><li><b>En personne</b> : Vente rapide, vous notez « payé par » (espèces, Lydia…).</li><li><b>Automatique en ligne</b> : PayPal et/ou carte bancaire (Stripe) → clé immédiate, rien à faire.</li><li><b>Virement, Lydia, Wero, PayPal entre proches, Revolut…</b> : activez-les dans Réglages avec vos coordonnées. Le client commande, vous recevez un email, vous vérifiez l\'argent, vous appuyez sur « Payé » → clé envoyée. Remboursement PayPal/Stripe → licence coupée automatiquement.</li></ul></div>' +
+    '<div class="card"><h3>3. Sans réseau</h3><p class="small muted">L\'application s\'ouvre et affiche les dernières données connues. Pour vendre sans connexion, préparez des clés à l\'avance : <b>Plus → Réserve de clés</b>. « Vente rapide » les utilise automatiquement et synchronise la vente au retour du réseau.</p></div>' +
+    '<div class="card"><h3>4. Comment la protection fonctionne</h3><p class="small muted">Chaque clé est liée à un nombre d\'appareils (2 par défaut). Si un client donne sa clé à 10 personnes, seules les 2 premières fonctionneront. L\'application vérifie la clé auprès de ce serveur ; une licence désactivée ou expirée bloque l\'application sous 7 jours maximum, même hors ligne.</p></div>' +
+    '<div class="card"><h3>5. Cas courants</h3><ul class="steps small muted"><li><b>Le client change d\'ordinateur</b> : sa licence → <b>Retirer</b> l\'ancien appareil (ou « Tout réinitialiser »).</li><li><b>Prolonger / faire un geste</b> : licence → <b>+30 jours</b>, <b>+1 an</b> ou date libre.</li><li><b>Remboursement PayPal</b> : la licence est désactivée automatiquement (webhook). Sinon : <b>Désactiver la licence</b>.</li><li><b>Clé perdue</b> : le client va sur la page « J\'ai un code » / « Déjà acheté ? », ou vous appuyez sur <b>Envoyer la clé par email</b>.</li><li><b>Nouvelle version de votre application</b> : Apps → Modifier → changez le lien et le numéro de version. Les clients voient « Nouvelle version disponible ».</li><li><b>Reçu / facture</b> : licence → <b>🧾 Reçu</b> (coordonnées dans Réglages → Vendeur).</li></ul></div>' +
+    '<div class="card"><h3>6. Ce qui est gratuit</h3><ul class="steps small muted"><li>Serveur Cloudflare : 100 000 requêtes/jour, 5 Go.</li><li>Emails Brevo : 300/jour (ou Resend : 3 000/mois).</li><li>PayPal : gratuit, mais prend environ 2,9 % + 0,35 € par vente (estimation affichée dans Finances).</li></ul></div>';
+  render(page({ title: 'Guide rapide', back: true, nav: '/plus' }, h));
+}
+
+/* ======================= Actions (délégation) ======================= */
+document.addEventListener('click', async function (e) {
+  var el = e.target.closest('[data-act]'); if (!el) return;
+  var act = el.dataset.act;
+  if (el.tagName === 'A') e.preventDefault();
+  switch (act) {
+    case 'back': history.length > 1 ? history.back() : go('/'); break;
+    case 'go': go(el.dataset.to); break;
+    case 'close-go': closeSheet(); go(el.dataset.to); break;
+    case 'close': closeSheet(); break;
+    case 'reload': route(); break;
+    case 'copy': copy(el.dataset.text); break;
+    case 'share-link': share(el.dataset.name, 'Acheter ' + el.dataset.name + ' : ', el.dataset.link); break;
+    case 'share-text': share(el.dataset.title || 'Accès', el.dataset.text); break;
+    case 'quick-sale': quickSale(el.dataset.id ? Number(el.dataset.id) : undefined); break;
+    case 'export-csv': exportCsv(); break;
+    case 'receipt': {
+      try {
+        var r = await api('/licenses/' + el.dataset.id + '/receipt-link', { method: 'POST', body: {} });
+        sheet('<h2>🧾 Reçu</h2><p class="muted small">Ce lien ouvre le reçu (imprimable / PDF). Vous pouvez l\'envoyer au client.</p><div class="key" style="font-size:12px">' + esc(r.url) + '</div><div class="actions"><a class="btn grow primary" href="' + esc(r.url) + '" target="_blank" rel="noopener">Ouvrir</a><button class="btn grow blue" data-act="share-text" data-title="Reçu" data-text="Votre reçu : ' + esc(r.url) + '">Envoyer au client</button><button class="btn grow" data-act="copy" data-text="' + esc(r.url) + '">Copier</button></div>');
+      } catch (err) { toast(err.message, true); }
+      break;
+    }
+    case 'pick-server': {
+      sheet('<h2>Choisir un serveur</h2><div class="list">' + S.servers.map(function (s, i) { return '<div class="item" data-act="switch-server" data-i="' + i + '"><div class="grow"><b>' + esc(s.name) + '</b><div class="muted small">' + esc(s.url) + '</div></div>' + I.chev + '</div>'; }).join('') + '</div>');
+      break;
+    }
+    case 'switch-server': S.current = Number(el.dataset.i); saveServers(); closeSheet(); go('/'); route(); break;
+    case 'rm-server': {
+      if (await confirmSheet('Retirer ce serveur de la liste ?', 'Le serveur lui-même n\'est pas supprimé ; vous pourrez le rajouter avec son adresse et le mot de passe.', 'Retirer', true)) {
+        var i = Number(el.dataset.i); S.servers.splice(i, 1); if (S.current >= S.servers.length) S.current = 0; else if (i < S.current) S.current--; saveServers(); viewServers();
+      }
+      break;
+    }
+    case 'rename-server': { var n = await promptSheet('Nom du serveur', 'Nom', srv().name); if (n) { srv().name = n.trim(); saveServers(); viewServers(); } break; }
+    case 'logout': { if (await confirmSheet('Se déconnecter ?', 'Vous devrez saisir à nouveau le mot de passe administrateur.', 'Se déconnecter')) { srv().token = null; saveServers(); route(); } break; }
+    case 'install': { if (S.deferredInstall) { S.deferredInstall.prompt(); S.deferredInstall = null; } break; }
+    case 'add-offer': document.getElementById('offers').insertAdjacentHTML('beforeend', offerRowHtml(null)); break;
+    case 'rm-offer': el.closest('.offer-row').remove(); break;
+    case 'del-product': {
+      if (await confirmSheet('Supprimer l\'application ?', 'Possible uniquement si aucune licence n\'a été vendue.', 'Supprimer', true)) {
+        try { await api('/products/' + el.dataset.id, { method: 'DELETE' }); toast('Supprimée'); go('/apps'); } catch (err) { toast(err.message, true); }
+      }
+      break;
+    }
+    case 'order-paid': {
+      var amt = await promptSheet('Paiement reçu ?', 'Montant reçu (€) — modifiez si différent', (Number(el.dataset.amount) / 100).toFixed(2), 'number', 'Payé, envoyer la clé');
+      if (amt === null) break;
+      try {
+        var ro = await api('/orders/' + el.dataset.id + '/paid', { method: 'POST', body: { amount_cents: parsePrice(amt) } });
+        var lo = ro.license; lo._emailSent = ro.email_sent;
+        var prods = (await api('/products')).products, pr0 = prods.find(function (x) { return x.id === lo.product_id; });
+        viewOrders();
+        showSaleResult(lo, pr0 ? pr0.download_url : '');
+      } catch (err) { toast(err.message, true); }
+      break;
+    }
+    case 'order-cancel': {
+      if (await confirmSheet('Annuler cette commande ?', 'Le client ne recevra pas de clé. Vous pourrez la rouvrir depuis l\'historique.', 'Annuler la commande', true)) {
+        try { await api('/orders/' + el.dataset.id + '/cancel', { method: 'POST', body: {} }); toast('Commande annulée'); viewOrders(); } catch (err) { toast(err.message, true); }
+      }
+      break;
+    }
+    case 'order-reopen': { try { await api('/orders/' + el.dataset.id + '/reopen', { method: 'POST', body: {} }); toast('Commande rouverte'); go('/commandes'); viewOrders(); } catch (err) { toast(err.message, true); } break; }
+    case 'del-stock': {
+      try { await api('/licenses/' + el.dataset.id + '/delete', { method: 'POST', body: {} }); toast('Clé retirée de la réserve'); viewStock(); } catch (err) { toast(err.message, true); }
+      break;
+    }
+    case 'lic-state': S.licFilter.state = el.dataset.v; S.licPage = 1; document.querySelectorAll('.chip').forEach(function (c) { c.classList.toggle('on', c === el); }); loadLicList(false); break;
+    case 'lic-more': S.licPage++; el.disabled = true; loadLicList(true); break;
+    case 'extend': {
+      var id = Number(el.dataset.id), days = el.dataset.days ? Number(el.dataset.days) : null;
+      if (!days) { var v = await promptSheet('Prolonger', 'Nombre de jours (négatif pour réduire)', '30', 'number', 'Prolonger'); if (v === null || !Number(v)) break; days = Number(v); }
+      licAction(id, 'extend', { days: days }); break;
+    }
+    case 'rm-device': {
+      if (await confirmSheet('Retirer cet appareil ?', 'Le client pourra activer la licence sur un autre appareil.', 'Retirer')) {
+        try { await api('/licenses/' + el.dataset.lic + '/devices/' + el.dataset.id, { method: 'DELETE' }); toast('Appareil retiré'); viewLicence(Number(el.dataset.lic)); } catch (err) { toast(err.message, true); }
+      }
+      break;
+    }
+    case 'lic': {
+      var lid = Number(el.dataset.id), a = el.dataset.a;
+      if (a === 'revoke') { if (await confirmSheet('Désactiver la licence ?', 'L\'application du client se bloquera sous 7 jours maximum. Vous pourrez la réactiver.', 'Désactiver', true)) licAction(lid, 'revoke'); }
+      else if (a === 'reactivate') licAction(lid, 'reactivate');
+      else if (a === 'reset_devices') { if (await confirmSheet('Réinitialiser les appareils ?', 'Tous les appareils seront retirés ; le client réactivera simplement sa clé.', 'Réinitialiser')) licAction(lid, 'reset_devices'); }
+      else if (a === 'set_max_devices') { var m = await promptSheet('Appareils autorisés', 'Nombre d\'appareils', '2', 'number'); if (m) licAction(lid, 'set_max_devices', { max_devices: Number(m) }); }
+      else if (a === 'set_expiry') { var dte = await promptSheet('Date de fin', 'La licence expirera à cette date', new Date(Date.now() + 365 * 86400000).toISOString().slice(0, 10), 'date'); if (dte) licAction(lid, 'set_expiry', { expires_at: dte + 'T23:59:59.000Z' }); }
+      else if (a === 'lifetime') { if (await confirmSheet('Passer la licence à vie ?', 'Elle n\'expirera plus jamais.', 'Passer à vie')) licAction(lid, 'set_expiry', { expires_at: null }); }
+      else if (a === 'set_customer') { var em2 = await promptSheet('Client', 'Email du client (vide pour retirer)', '', 'email'); if (em2 !== null) licAction(lid, 'set_customer', { email: em2.trim() }); }
+      else if (a === 'set_payment_method') {
+        sheet('<h2>Payé par</h2><div class="chips wrapc">' + QUICK_METHODS.map(function (m) { return '<span class="chip big" data-act="lic-method" data-id="' + lid + '" data-m="' + m[0] + '">' + m[1] + '</span>'; }).join('') + '</div>');
+      }
+      else if (a === 'set_price') { var pr = await promptSheet('Prix payé', 'Montant en € (pour vos statistiques et le reçu)', el.dataset.price || '', 'number'); if (pr !== null) licAction(lid, 'set_price', { price_cents: parsePrice(pr) }); }
+      else if (a === 'resend_email') { var to = await promptSheet('Envoyer la clé par email', 'Adresse email', el.dataset.email || '', 'email', 'Envoyer'); if (to) licAction(lid, 'resend_email', { email: to.trim() }); }
+      else if (a === 'note') { var nt = await promptSheet('Note', 'Note interne', el.dataset.note || ''); if (nt !== null) licAction(lid, 'note', { note: nt }); }
+      else if (a === 'delete') { if (await confirmSheet('Supprimer définitivement ?', 'La clé ne fonctionnera plus et disparaîtra des statistiques. Préférez « Désactiver » si vous hésitez.', 'Supprimer', true)) { try { await api('/licenses/' + lid + '/delete', { method: 'POST', body: {} }); toast('Supprimée'); go('/licences'); } catch (err) { toast(err.message, true); } } }
+      break;
+    }
+    case 'lic-method': closeSheet(); licAction(Number(el.dataset.id), 'set_payment_method', { payment_method: el.dataset.m }); break;
+    case 'edit-client': {
+      sheet('<h2>Modifier le client</h2><label class="f">Email</label><input id="c-email" type="email" value="' + esc(el.dataset.email) + '"><label class="f">Nom</label><input id="c-name" type="text" value="' + esc(el.dataset.name) + '"><div class="actions"><button class="btn grow" data-act="close">Annuler</button><button class="btn grow primary" id="c-save">Enregistrer</button></div>');
+      document.getElementById('c-save').onclick = async function () {
+        try { await api('/customers/' + el.dataset.id, { method: 'PUT', body: { email: document.getElementById('c-email').value.trim(), name: document.getElementById('c-name').value.trim() } }); closeSheet(); toast('Enregistré ✓'); viewClient(Number(el.dataset.id)); } catch (err) { toast(err.message, true); }
+      };
+      break;
+    }
+    case 'test-email': { var te = await promptSheet('Email de test', 'Envoyer à', '', 'email', 'Envoyer'); if (te) { try { await api('/test-email', { method: 'POST', body: { to: te.trim() } }); toast('Email de test envoyé ✓'); } catch (err) { toast(err.message, true); } } break; }
+  }
+});
+
+/* ======================= Démarrage ======================= */
+window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); S.deferredInstall = e; });
+window.addEventListener('online', function () { if (srv().token) { api('/me', { noCache: true }).catch(function () {}); } });
+if ('serviceWorker' in navigator && window.isSecureContext) { navigator.serviceWorker.register('/sw.js', { scope: '/admin' }).catch(function () {}); }
+loadServers();
+updateOfflineBar();
+route();
+if (S.queue.length && srv().token) flushQueue();
+</script>
+</body>
+</html>

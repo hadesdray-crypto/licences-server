@@ -1,0 +1,27 @@
+=====================================================================
+  MES LICENCES – installation en 3 gestes (une seule fois)
+=====================================================================
+
+1. Créez un compte gratuit sur https://dash.cloudflare.com/sign-up
+   (email + mot de passe, aucune carte bancaire) et confirmez l'email.
+
+2. Double-cliquez sur :
+     - Windows : INSTALLER-WINDOWS.bat
+     - Mac     : INSTALLER-MAC.command   (si refusé : clic droit → Ouvrir)
+   Le programme installe ce qu'il faut, vous demande d'autoriser
+   l'accès à votre compte Cloudflare dans le navigateur, met votre
+   serveur en ligne, puis ouvre l'application.
+
+3. Dans la page qui s'ouvre, choisissez votre mot de passe. C'est fini.
+   Sur votre téléphone : ouvrez la même adresse (…/admin) puis
+   « Ajouter à l'écran d'accueil ».
+
+Tout le reste se fait dans l'application sur le téléphone :
+  - ⚡ Vente rapide (vous êtes avec la personne : code + lien envoyés par SMS/WhatsApp)
+  - Page de vente en ligne : PayPal, carte bancaire (Stripe), virement, Lydia, Wero,
+    PayPal entre proches, Revolut, espèces… Les paiements « à la main » apparaissent
+    dans « Paiements à valider » : vous appuyez sur « Payé » et la clé part toute seule.
+  - Clients, finances, reçus, export comptable, réserve de clés hors ligne, réglages.
+
+Le mode d'emploi complet est dans GUIDE.md.
+Pour mettre à jour le serveur plus tard : MISE-A-JOUR-WINDOWS.bat / MISE-A-JOUR-MAC.command

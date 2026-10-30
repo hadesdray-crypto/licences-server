@@ -1,0 +1,21 @@
+{
+  "name": "licences-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Serveur de licences gratuit (Cloudflare Workers + D1) avec paiement PayPal et application d'administration mobile",
+  "type": "module",
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "secrets": "node scripts/secrets.mjs",
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev --local --port 8787",
+    "local": "node scripts/dev-local.mjs",
+    "db:init": "wrangler d1 execute licences-db --remote --file=schema.sql -y",
+    "db:init:local": "wrangler d1 execute licences-db --local --file=schema.sql -y",
+    "logs": "wrangler tail",
+    "test": "node scripts/test-local.mjs"
+  },
+  "devDependencies": {
+    "wrangler": "^4"
+  }
+}

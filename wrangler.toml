@@ -1,0 +1,42 @@
+# Configuration du serveur de licences (Cloudflare Workers + D1)
+# Ce fichier est mis à jour automatiquement par : npm run setup
+
+name = "licences"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+workers_dev = true
+
+[observability]
+enabled = true
+
+# Base de données. Créée automatiquement au premier déploiement (ou par npm run setup, qui ajoute database_id ici).
+[[d1_databases]]
+binding = "DB"
+database_name = "licences-db"
+
+# Variables publiques (modifiables ici ou avec : npm run secrets)
+[vars]
+APP_NAME = "Mes licences"      # nom affiché dans l'application et les emails
+CURRENCY = "EUR"
+PAYPAL_ENV = "sandbox"         # "sandbox" = test, "live" = vrais paiements
+PAYPAL_CLIENT_ID = ""          # identifiant client PayPal (public)
+EMAIL_FROM = ""                # adresse expéditrice vérifiée chez Brevo ou Resend
+EMAIL_FROM_NAME = ""           # nom affiché comme expéditeur
+
+# Secrets (JAMAIS dans ce fichier ; définis avec : npm run setup / npm run secrets)
+#   ADMIN_PASSWORD     mot de passe de l'application d'administration
+#   SIGNING_SECRET     clé aléatoire servant à signer les jetons
+#   PAYPAL_SECRET      secret de l'application PayPal
+#   PAYPAL_WEBHOOK_ID  identifiant du webhook PayPal
+#   BREVO_API_KEY      ou RESEND_API_KEY pour l'envoi des emails
+
+# Fichiers importés comme texte / binaire par le code
+[[rules]]
+type = "Text"
+globs = ["**/*.html", "**/*.txt", "**/*.sql"]
+fallthrough = true
+
+[[rules]]
+type = "Data"
+globs = ["**/*.png"]
+fallthrough = true

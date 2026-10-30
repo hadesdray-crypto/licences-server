@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__BRAND__ – Mon accès</title>
+<meta name="robots" content="noindex">
+<style>
+  :root { --bg:#f6f7fb; --card:#fff; --text:#0f172a; --muted:#64748b; --line:#e2e8f0; --accent:#2563eb; --ok:#059669; --err:#dc2626; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0b1220; --card:#111a2e; --text:#e5e7eb; --muted:#94a3b8; --line:#1f2a44; } }
+  * { box-sizing:border-box }
+  body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--text); line-height:1.45 }
+  .wrap { max-width:480px; margin:0 auto; padding:28px 16px 48px }
+  .brand { color:var(--muted); font-size:13px; margin-bottom:6px }
+  h1 { font-size:24px; margin:0 0 6px } p { margin:0 0 14px }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px; margin-bottom:16px }
+  input { width:100%; padding:14px; font-size:15px; font-family:ui-monospace,Menlo,Consolas,monospace; text-transform:uppercase; letter-spacing:.5px; border:1px solid var(--line); border-radius:10px; background:transparent; color:var(--text) }
+  .btn { display:block; width:100%; text-align:center; padding:14px; border-radius:10px; font-weight:600; text-decoration:none; border:0; font-size:16px; cursor:pointer; margin-top:10px }
+  .primary { background:var(--accent); color:#fff } .ghost { background:transparent; border:1px solid var(--line); color:var(--text) }
+  .msg { margin-top:12px; font-size:14px; color:var(--err); min-height:18px }
+  .key { font-family:ui-monospace,Menlo,Consolas,monospace; font-size:17px; background:#0f172a; color:#fff; padding:12px; border-radius:10px; text-align:center; word-break:break-all; margin:10px 0 }
+  .kv { display:flex; justify-content:space-between; gap:12px; padding:8px 0; border-bottom:1px solid var(--line); font-size:15px } .kv:last-child { border-bottom:0 } .kv span:first-child { color:var(--muted) }
+  ol { padding-left:20px; color:var(--muted); font-size:14px } li { margin:5px 0 }
+  .hidden { display:none } .muted { color:var(--muted); font-size:13px }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">__BRAND__</div>
+  <h1>Mon accès</h1>
+  <p class="muted">Entrez le code que vous avez reçu pour retrouver votre lien de téléchargement et l'état de votre licence.</p>
+
+  <div class="card" id="form">
+    <input id="key" placeholder="XXXXX-XXXX-XXXX-XXXX-XXXX" autocomplete="off" spellcheck="false" autofocus>
+    <button class="btn primary" id="btn">Voir mon accès</button>
+    <div class="msg" id="msg"></div>
+  </div>
+
+  <div class="card hidden" id="result">
+    <h2 style="margin:0 0 6px" id="r-name"></h2>
+    <div class="key" id="r-key"></div>
+    <div class="kv"><span>État</span><b id="r-state"></b></div>
+    <div class="kv"><span>Validité</span><span id="r-validity"></span></div>
+    <div class="kv"><span>Appareils</span><span id="r-devices"></span></div>
+    <a class="btn primary hidden" id="r-dl" href="#" target="_blank" rel="noopener">Télécharger l'application</a>
+    <p class="muted" id="r-nodl" style="margin-top:10px"></p>
+    <h3 style="margin:16px 0 6px;font-size:15px">Comment l'activer</h3>
+    <ol>
+      <li>Installez et ouvrez l'application.</li>
+      <li>Au premier démarrage (ou menu <i>Licence</i>), collez le code ci-dessus et validez.</li>
+      <li>C'est tout : l'application se débloque immédiatement.</li>
+    </ol>
+    <a class="btn ghost hidden" id="r-buy" href="#">Renouveler / acheter une licence</a>
+    <button class="btn ghost" id="again">Autre code</button>
+  </div>
+</div>
+<script>
+(function () {
+  var ORIGIN = '__ORIGIN__', $ = function (i) { return document.getElementById(i); };
+  function dur(d) { if (!d) return 'illimitée'; if (d % 365 === 0) return d / 365 === 1 ? '1 an' : d / 365 + ' ans'; if (d % 30 === 0) return d / 30 + ' mois'; return d + ' jours'; }
+  function fdate(iso) { try { return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return iso; } }
+  var STATES = { active: 'Active ✅', pending: 'Prête à activer', stock: 'Prête à activer', expired: 'Expirée', revoked: 'Désactivée' };
+  async function go() {
+    var key = $('key').value.trim(); $('msg').textContent = '';
+    if (key.length < 10) { $('msg').textContent = 'Entrez le code complet.'; return; }
+    $('btn').disabled = true;
+    try {
+      var res = await fetch(ORIGIN + '/api/lookup', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ key: key }) });
+      var d = await res.json();
+      if (!res.ok) throw new Error(d.error || 'Erreur');
+      $('r-name').textContent = d.product_name; $('r-key').textContent = d.key;
+      $('r-state').textContent = STATES[d.state] || d.state; $('r-state').style.color = d.state === 'active' || d.state === 'pending' || d.state === 'stock' ? 'var(--ok)' : 'var(--err)';
+      $('r-validity').textContent = d.lifetime ? 'Illimitée' : d.expires_at ? (d.state === 'expired' ? 'Expirée le ' : 'Jusqu\'au ') + fdate(d.expires_at) : dur(d.duration_days) + ' à partir de l\'activation';
+      $('r-devices').textContent = d.devices_used + ' / ' + d.max_devices;
+      if (d.download_url) { $('r-dl').href = d.download_url; $('r-dl').classList.remove('hidden'); $('r-nodl').textContent = ''; }
+      else { $('r-dl').classList.add('hidden'); $('r-nodl').textContent = 'Le lien de téléchargement vous est communiqué par le vendeur.'; }
+      if (d.state === 'expired' || d.state === 'revoked') { $('r-buy').href = d.buy_url; $('r-buy').classList.remove('hidden'); } else $('r-buy').classList.add('hidden');
+      $('form').classList.add('hidden'); $('result').classList.remove('hidden');
+    } catch (e) { $('msg').textContent = e.message; }
+    $('btn').disabled = false;
+  }
+  $('btn').addEventListener('click', go);
+  $('key').addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
+  $('again').addEventListener('click', function () { $('result').classList.add('hidden'); $('form').classList.remove('hidden'); $('key').value = ''; $('key').focus(); });
+  var h = location.hash.slice(1); if (h) { $('key').value = decodeURIComponent(h); go(); }
+})();
+</script>
+</body>
+</html>
