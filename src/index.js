@@ -15,7 +15,7 @@ import { handleAdminApi } from './admin.js';
 import { handlePublicApi } from './public.js';
 import { handlePaypal } from './paypal.js';
 import { handleStripe } from './stripe.js';
-import { bumpStats, getProductBySlug, getLicense, ensureSchema } from './db.js';
+import { bumpStats, getProductBySlug, getLicense, ensureSchema, methodLabel } from './db.js';
 import { withSettings } from './settings.js';
 import { verifyLink } from './auth.js';
 
@@ -149,7 +149,8 @@ async function receiptPage(env, rest, url) {
   const number = `R-${lic.created_at.slice(0, 4)}-${String(lic.id).padStart(5, '0')}`;
   const contact = [s.seller_email, s.seller_phone].filter(Boolean).join(' · ');
   const customer = [lic.customer_name, lic.customer_email].filter(Boolean).join('<br>') || 'Client';
-  const payment = lic.source === 'paypal' ? `Paiement PayPal${lic.paypal_order_id ? ' · réf. ' + escapeHtml(lic.paypal_order_id) : ''}` : 'Paiement reçu';
+  const ref = lic.paypal_order_id || lic.stripe_payment_intent || '';
+  const payment = `Paiement ${lic.payment_method ? 'par ' + escapeHtml(methodLabel(lic.payment_method)) : 'reçu'}${ref ? ' · réf. ' + escapeHtml(ref) : ''}`;
   const page = receiptHtml
     .replaceAll('__NUMBER__', escapeHtml(number))
     .replaceAll('__DATE__', escapeHtml(fmtDateFr(lic.created_at)))
