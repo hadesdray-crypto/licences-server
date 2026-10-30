@@ -14,14 +14,11 @@ enabled = true
 binding = "DB"
 database_name = "licences-db"
 
-# Variables publiques (modifiables ici ou avec : npm run secrets)
+# Variables publiques (tout se règle aussi depuis l'application : Plus → Réglages)
 [vars]
 APP_NAME = "Mes licences"      # nom affiché dans l'application et les emails
 CURRENCY = "EUR"
 PAYPAL_ENV = "sandbox"         # "sandbox" = test, "live" = vrais paiements
-PAYPAL_CLIENT_ID = ""          # identifiant client PayPal (public)
-EMAIL_FROM = ""                # adresse expéditrice vérifiée chez Brevo ou Resend
-EMAIL_FROM_NAME = ""           # nom affiché comme expéditeur
 
 # Secrets (JAMAIS dans ce fichier ; définis avec : npm run setup / npm run secrets)
 #   ADMIN_PASSWORD     mot de passe de l'application d'administration

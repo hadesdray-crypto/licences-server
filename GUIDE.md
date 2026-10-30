@@ -175,7 +175,7 @@ Vos données (licences, clients, réglages) sont dans la base, jamais dans le co
 ```
 npm run local
 ```
-puis <http://localhost:8787/admin> (mot de passe `test1234`, ou celui du fichier `.dev.vars`). Nécessite Node.js 22.5+. `npm test` lance les 126 tests automatiques.
+puis <http://localhost:8787/admin> (mot de passe `test1234`). Nécessite Node.js 22.5+. `npm test` lance les 126 tests automatiques.
 
 ## Sécurité : ce qu'il faut savoir honnêtement
 - **Partage de code** : bloqué par la limite d'appareils (2 par défaut). Un code diffusé sur un forum ne sert qu'aux 2 premiers.
